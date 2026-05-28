@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha del Personal - Seguridad LTDA</title>
+    <style>
+        :root {
+            --primary-color: #0f172a;
+            --secondary-color: #3b82f6;
+            --bg-color: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .form-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        select {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input {
+            width: 1.2rem;
+            height: 1.2rem;
+        }
+
+        .btn-submit {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: #2563eb;
+        }
+
+        .section-title {
+            grid-column: 1 / -1;
+            background-color: var(--bg-color);
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            margin-bottom: -0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-container">
+        <h2>Ficha Completa del Personal</h2>
+        <form action="#" method="POST" onsubmit="event.preventDefault(); alert('Ficha guardada exitosamente.');">
+            
+            <div class="form-grid">
+                <div class="section-title">Información Personal</div>
+                <div class="form-group">
+                    <label for="rut">RUT</label>
+                    <input type="text" id="rut" name="rut" placeholder="Ej: 12.345.678-9" required>
+                </div>
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Nombres y Apellidos" required>
+                </div>
+                <div class="form-group">
+                    <label for="fotografia">Fotografía</label>
+                    <input type="file" id="fotografia" name="fotografia" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="cargas">Cargas Familiares</label>
+                    <input type="number" id="cargas" name="cargas" min="0" value="0">
+                </div>
+
+                <div class="section-title">Datos Laborales</div>
+                <div class="form-group">
+                    <label for="cargo">Cargo</label>
+                    <input type="text" id="cargo" name="cargo" placeholder="Ej: Guardia de Seguridad" required>
+                </div>
+                <div class="form-group">
+                    <label for="centro_costo">Centro de Costo</label>
+                    <select id="centro_costo" name="centro_costo">
+                        <option value="norte">Zona Norte</option>
+                        <option value="centro">Zona Centro</option>
+                        <option value="sur">Zona Sur</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="contrato">Tipo de Contrato</label>
+                    <select id="contrato" name="contrato">
+                        <option value="indefinido">Indefinido</option>
+                        <option value="plazo_fijo">Plazo Fijo</option>
+                        <option value="honorarios">Honorarios</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="prevision">Previsión (AFP/Salud)</label>
+                    <input type="text" id="prevision" name="prevision" placeholder="Ej: AFP Modelo / Fonasa">
+                </div>
+                <div class="form-group">
+                    <label for="curriculum">Currículum Vitae</label>
+                    <input type="file" id="curriculum" name="curriculum" accept=".pdf,.doc,.docx">
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="reloj_control" name="reloj_control" checked>
+                    <label for="reloj_control" style="margin:0;">Asignar a Reloj Control</label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">Guardar Ficha de los empleados</button>
+        </form>
+    </div>
+
+</body>
+</html>
