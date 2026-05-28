@@ -10,7 +10,7 @@
   <div>
     <h1>Control de Bodegas</h1>
 
-    <table>
+    <table border="1" id="tablaBodegas">
       <thead>
         <tr>
           <th>Bodega</th>
@@ -21,22 +21,252 @@
           <th>Acciones</th>
         </tr>
       </thead>
-      <tbody>
-
-        <tr>
-          <td>Bodega Norte</td>
-          <td>Cemento 42.5 kg</td>
-          <td>120</td>
-          <td>200</td>
-          <td>80</td>
-          <td>
-            <button>Entrada</button>
-            <button>Salida</button>
-          </td>
-        </tr>
+      <tbody id="tablaBody">
       </tbody>
     </table>
 
+    <div>
+      <h2>Registrar movimiento</h2>
+      <div>
+        <label>
+          Bodega:
+          <select id="bodegaSelect"></select>
+        </label>
+        <label>
+          Producto:
+          <select id="productoSelect"></select>
+        </label>
+        <label>
+          Cantidad:
+          <input type="number" id="cantidadInput" value="1" min="1">
+        </label>
+        <button id="btnEntrada">Registrar entrada</button>
+        <button id="btnSalida">Registrar salida</button>
+      </div>
+    </div>
+
   </div>
+
+  <script>
+    let bodegas = [
+      {
+        id: 1,
+        nombre: "Bodega Norte",
+        productos: [
+          { idProd: 101, nombre: "Ejemplo A", stock: 100, entradasAcum: 150, salidasAcum: 50 },
+          { idProd: 102, nombre: "Ejemplo B", stock: 200, entradasAcum: 250, salidasAcum: 50 },
+          { idProd: 103, nombre: "Ejemplo C", stock: 300, entradasAcum: 350, salidasAcum: 50 }
+        ]
+      },
+      {
+        id: 2,
+        nombre: "Bodega Sur",
+        productos: [
+          { idProd: 101, nombre: "Ejemplo A", stock: 50, entradasAcum: 80, salidasAcum: 30 },
+          { idProd: 102, nombre: "Ejemplo B", stock: 75, entradasAcum: 100, salidasAcum: 25 },
+          { idProd: 103, nombre: "Ejemplo C", stock: 120, entradasAcum: 150, salidasAcum: 30 }
+        ]
+      },
+      {
+        id: 3,
+        nombre: "Bodega Central",
+        productos: [
+          { idProd: 101, nombre: "Ejemplo A", stock: 200, entradasAcum: 300, salidasAcum: 100 },
+          { idProd: 102, nombre: "Ejemplo B", stock: 150, entradasAcum: 200, salidasAcum: 50 },
+          { idProd: 103, nombre: "Ejemplo C", stock: 80, entradasAcum: 120, salidasAcum: 40 }
+        ]
+      }
+    ];
+
+    function renderizarTabla() {
+      const tbody = document.getElementById('tablaBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      for (const bodega of bodegas) {
+        for (const prod of bodega.productos) {
+          const fila = document.createElement('tr');
+
+          //bodega
+          const tdBodega = document.createElement('td');
+          tdBodega.textContent = bodega.nombre;
+          fila.appendChild(tdBodega);
+
+          //producto
+          const tdProducto = document.createElement('td');
+          tdProducto.textContent = prod.nombre;
+          fila.appendChild(tdProducto);
+
+          //stock actual
+          const tdStock = document.createElement('td');
+          tdStock.textContent = prod.stock;
+          fila.appendChild(tdStock);
+
+          //entradas acumuladas
+          const tdEntradas = document.createElement('td');
+          tdEntradas.textContent = prod.entradasAcum;
+          fila.appendChild(tdEntradas);
+
+          //salidas acumuladas
+          const tdSalidas = document.createElement('td');
+          tdSalidas.textContent = prod.salidasAcum;
+          fila.appendChild(tdSalidas);
+
+          //botones Entrada y Salida
+          const tdAcciones = document.createElement('td');
+          const btnEntradaFila = document.createElement('button');
+          btnEntradaFila.textContent = 'Entrada';
+          btnEntradaFila.addEventListener('click', () => {
+            let cant = prompt(`Cantidad de entrada para ${prod.nombre} en ${bodega.nombre}:`, '1');
+            if (cant !== null && !isNaN(parseFloat(cant)) && parseFloat(cant) > 0) {
+              registrarMovimiento(bodega.id, prod.idProd, 'entrada', parseFloat(cant));
+            } else if (cant !== null) {
+              alert('Cantidad inválida. Debe ser un número positivo.');
+            }
+          });
+
+          const btnSalidaFila = document.createElement('button');
+          btnSalidaFila.textContent = 'Salida';
+          btnSalidaFila.addEventListener('click', () => {
+            let cant = prompt(`Cantidad de salida para ${prod.nombre} en ${bodega.nombre}:`, '1');
+            if (cant !== null && !isNaN(parseFloat(cant)) && parseFloat(cant) > 0) {
+              registrarMovimiento(bodega.id, prod.idProd, 'salida', parseFloat(cant));
+            } else if (cant !== null) {
+              alert('Cantidad inválida. Debe ser un número positivo.');
+            }
+          });
+
+          tdAcciones.appendChild(btnEntradaFila);
+          tdAcciones.appendChild(document.createTextNode(' '));
+          tdAcciones.appendChild(btnSalidaFila);
+          fila.appendChild(tdAcciones);
+
+          tbody.appendChild(fila);
+        }
+      }
+    }
+
+    // ----- FUNCIÓN REGISTRAR MOVIMIENTO (Paso 6) -----
+    function registrarMovimiento(bodegaId, productoId, tipo, cantidad) {
+      // Buscar bodega y producto
+      const bodega = bodegas.find(b => b.id === bodegaId);
+      if (!bodega) {
+        alert('Bodega no encontrada');
+        return false;
+      }
+      const producto = bodega.productos.find(p => p.idProd === productoId);
+      if (!producto) {
+        alert('Producto no encontrado');
+        return false;
+      }
+
+      if (tipo === 'entrada') {
+        producto.stock += cantidad;
+        producto.entradasAcum += cantidad;
+        renderizarTabla();
+        actualizarSelectores();    // para refrescar la lista de productos (opcional)
+        return true;
+      } 
+      else if (tipo === 'salida') {
+        if (producto.stock >= cantidad) {
+          producto.stock -= cantidad;
+          producto.salidasAcum += cantidad;
+          renderizarTabla();
+          actualizarSelectores();
+          return true;
+        } else {
+          alert(`Stock insuficiente en ${bodega.nombre} - ${producto.nombre}. Stock actual: ${producto.stock}`);
+          return false;
+        }
+      }
+      return false;
+    }
+
+    function actualizarSelectores() {
+      const selectBodega = document.getElementById('bodegaSelect');
+      const selectProducto = document.getElementById('productoSelect');
+      if (!selectBodega || !selectProducto) return;
+
+      // Guardar selección actual
+      const bodegaSeleccionada = selectBodega.value ? parseInt(selectBodega.value) : null;
+      
+      // Llenar bodegas
+      selectBodega.innerHTML = '';
+      bodegas.forEach(b => {
+        const option = document.createElement('option');
+        option.value = b.id;
+        option.textContent = b.nombre;
+        selectBodega.appendChild(option);
+      });
+      
+      // Restaurar selección si es válida
+      if (bodegaSeleccionada && bodegas.some(b => b.id === bodegaSeleccionada)) {
+        selectBodega.value = bodegaSeleccionada;
+      }
+      
+      // Llenar productos según bodega actual
+      const bodegaId = parseInt(selectBodega.value);
+      const bodegaActual = bodegas.find(b => b.id === bodegaId);
+      selectProducto.innerHTML = '';
+      if (bodegaActual) {
+        bodegaActual.productos.forEach(p => {
+          const option = document.createElement('option');
+          option.value = p.idProd;
+          option.textContent = `${p.nombre} (stock: ${p.stock})`;
+          selectProducto.appendChild(option);
+        });
+      }
+    }
+
+    function configurarEventosFormulario() {
+      const btnEntrada = document.getElementById('btnEntrada');
+      const btnSalida = document.getElementById('btnSalida');
+      const selectBodega = document.getElementById('bodegaSelect');
+      const selectProducto = document.getElementById('productoSelect');
+      const cantidadInput = document.getElementById('cantidadInput');
+
+      if (!btnEntrada || !btnSalida) return;
+
+      selectBodega.addEventListener('change', () => {
+        actualizarSelectores();
+      });
+
+      function obtenerDatosFormulario() {
+        const bodegaId = parseInt(selectBodega.value);
+        const productoId = parseInt(selectProducto.value);
+        let cantidad = parseFloat(cantidadInput.value);
+        if (isNaN(cantidad) || cantidad <= 0) {
+          alert('Ingrese una cantidad válida mayor a cero');
+          return null;
+        }
+        return { bodegaId, productoId, cantidad };
+      }
+
+      btnEntrada.addEventListener('click', () => {
+        const datos = obtenerDatosFormulario();
+        if (datos) {
+          registrarMovimiento(datos.bodegaId, datos.productoId, 'entrada', datos.cantidad);
+          cantidadInput.value = 1;
+        }
+      });
+
+      btnSalida.addEventListener('click', () => {
+        const datos = obtenerDatosFormulario();
+        if (datos) {
+          registrarMovimiento(datos.bodegaId, datos.productoId, 'salida', datos.cantidad);
+          cantidadInput.value = 1;
+        }
+      });
+    }
+
+    
+    function init() {
+      actualizarSelectores();   // llenar selects según modelo
+      renderizarTabla();        // mostrar tabla con datos iniciales
+      configurarEventosFormulario();
+    }
+
+    init();
+  </script>
 </body>
 </html>
