@@ -14,16 +14,15 @@
       <thead>
         <tr>
           <th>Bodega</th>
-          <th>Producto / Ítem</th>
+          <th>Producto / Item</th>
           <th>Stock actual</th>
           <th>Entradas acumuladas</th>
           <th>Salidas acumuladas</th>
-          <th>Acciones</th>
         </tr>
       </thead>
       <tbody id="tablaBody">
       </tbody>
-    </table>
+     </table>
 
     <div>
       <h2>Registrar movimiento</h2>
@@ -45,10 +44,44 @@
       </div>
     </div>
 
+    <div>
+      <h2>Gestionar productos (CRUD)</h2>
+      <div>
+        <label>
+          Bodega para el producto:
+          <select id="crudBodegaSelect"></select>
+        </label>
+        <label>
+          Nombre del producto:
+          <input type="text" id="productoNombre" placeholder="Ej. Producto X">
+        </label>
+        <label>
+          Stock inicial:
+          <input type="number" id="productoStockInicial" value="0" min="0">
+        </label>
+        <button id="btnAgregarProducto">Agregar producto</button>
+      </div>
+      <div style="margin-top: 10px;">
+        <label>
+          Seleccionar producto existente:
+          <select id="editarProductoSelect"></select>
+        </label>
+        <label>
+          Nuevo nombre:
+          <input type="text" id="editarNombre" placeholder="Nuevo nombre">
+        </label>
+        <label>
+          Nuevo stock (actual):
+          <input type="number" id="editarStock" step="1">
+        </label>
+        <button id="btnEditarProducto">Editar producto</button>
+        <button id="btnEliminarProducto">Eliminar producto</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    let bodegas = [
+    const datosIniciales = [
       {
         id: 1,
         nombre: "Bodega Norte",
@@ -78,6 +111,37 @@
       }
     ];
 
+    let bodegas = [];
+
+    function guardarEnLocalStorage() {
+      localStorage.setItem('bodegasControl', JSON.stringify(bodegas));
+    }
+
+    function cargarDesdeLocalStorage() {
+      const datosGuardados = localStorage.getItem('bodegasControl');
+      if (datosGuardados) {
+        try {
+          bodegas = JSON.parse(datosGuardados);
+          if (!Array.isArray(bodegas) || bodegas.length === 0) {
+            throw new Error('Datos inválidos');
+          }
+        } catch (e) {
+          bodegas = JSON.parse(JSON.stringify(datosIniciales));
+        }
+      } else {
+        bodegas = JSON.parse(JSON.stringify(datosIniciales));
+        guardarEnLocalStorage();
+      }
+    }
+
+    function generarNuevoIdProd(bodega) {
+      let maxId = 0;
+      for (const prod of bodega.productos) {
+        if (prod.idProd > maxId) maxId = prod.idProd;
+      }
+      return maxId + 1;
+    }
+
     function renderizarTabla() {
       const tbody = document.getElementById('tablaBody');
       if (!tbody) return;
@@ -87,68 +151,32 @@
         for (const prod of bodega.productos) {
           const fila = document.createElement('tr');
 
-          //bodega
           const tdBodega = document.createElement('td');
           tdBodega.textContent = bodega.nombre;
           fila.appendChild(tdBodega);
 
-          //producto
           const tdProducto = document.createElement('td');
           tdProducto.textContent = prod.nombre;
           fila.appendChild(tdProducto);
 
-          //stock actual
           const tdStock = document.createElement('td');
           tdStock.textContent = prod.stock;
           fila.appendChild(tdStock);
 
-          //entradas acumuladas
           const tdEntradas = document.createElement('td');
           tdEntradas.textContent = prod.entradasAcum;
           fila.appendChild(tdEntradas);
 
-          //salidas acumuladas
           const tdSalidas = document.createElement('td');
           tdSalidas.textContent = prod.salidasAcum;
           fila.appendChild(tdSalidas);
-
-          //botones Entrada y Salida
-          const tdAcciones = document.createElement('td');
-          const btnEntradaFila = document.createElement('button');
-          btnEntradaFila.textContent = 'Entrada';
-          btnEntradaFila.addEventListener('click', () => {
-            let cant = prompt(`Cantidad de entrada para ${prod.nombre} en ${bodega.nombre}:`, '1');
-            if (cant !== null && !isNaN(parseFloat(cant)) && parseFloat(cant) > 0) {
-              registrarMovimiento(bodega.id, prod.idProd, 'entrada', parseFloat(cant));
-            } else if (cant !== null) {
-              alert('Cantidad inválida. Debe ser un número positivo.');
-            }
-          });
-
-          const btnSalidaFila = document.createElement('button');
-          btnSalidaFila.textContent = 'Salida';
-          btnSalidaFila.addEventListener('click', () => {
-            let cant = prompt(`Cantidad de salida para ${prod.nombre} en ${bodega.nombre}:`, '1');
-            if (cant !== null && !isNaN(parseFloat(cant)) && parseFloat(cant) > 0) {
-              registrarMovimiento(bodega.id, prod.idProd, 'salida', parseFloat(cant));
-            } else if (cant !== null) {
-              alert('Cantidad inválida. Debe ser un número positivo.');
-            }
-          });
-
-          tdAcciones.appendChild(btnEntradaFila);
-          tdAcciones.appendChild(document.createTextNode(' '));
-          tdAcciones.appendChild(btnSalidaFila);
-          fila.appendChild(tdAcciones);
 
           tbody.appendChild(fila);
         }
       }
     }
 
-    // ----- FUNCIÓN REGISTRAR MOVIMIENTO (Paso 6) -----
     function registrarMovimiento(bodegaId, productoId, tipo, cantidad) {
-      // Buscar bodega y producto
       const bodega = bodegas.find(b => b.id === bodegaId);
       if (!bodega) {
         alert('Bodega no encontrada');
@@ -164,7 +192,8 @@
         producto.stock += cantidad;
         producto.entradasAcum += cantidad;
         renderizarTabla();
-        actualizarSelectores();    // para refrescar la lista de productos (opcional)
+        actualizarSelectores();
+        guardarEnLocalStorage();
         return true;
       } 
       else if (tipo === 'salida') {
@@ -173,6 +202,7 @@
           producto.salidasAcum += cantidad;
           renderizarTabla();
           actualizarSelectores();
+          guardarEnLocalStorage();
           return true;
         } else {
           alert(`Stock insuficiente en ${bodega.nombre} - ${producto.nombre}. Stock actual: ${producto.stock}`);
@@ -182,15 +212,13 @@
       return false;
     }
 
-    function actualizarSelectores() {
+    function actualizarSelectoresMovimiento() {
       const selectBodega = document.getElementById('bodegaSelect');
       const selectProducto = document.getElementById('productoSelect');
       if (!selectBodega || !selectProducto) return;
 
-      // Guardar selección actual
       const bodegaSeleccionada = selectBodega.value ? parseInt(selectBodega.value) : null;
       
-      // Llenar bodegas
       selectBodega.innerHTML = '';
       bodegas.forEach(b => {
         const option = document.createElement('option');
@@ -199,12 +227,10 @@
         selectBodega.appendChild(option);
       });
       
-      // Restaurar selección si es válida
       if (bodegaSeleccionada && bodegas.some(b => b.id === bodegaSeleccionada)) {
         selectBodega.value = bodegaSeleccionada;
       }
       
-      // Llenar productos según bodega actual
       const bodegaId = parseInt(selectBodega.value);
       const bodegaActual = bodegas.find(b => b.id === bodegaId);
       selectProducto.innerHTML = '';
@@ -218,7 +244,163 @@
       }
     }
 
-    function configurarEventosFormulario() {
+    function actualizarSelectoresCrud() {
+      const crudBodegaSelect = document.getElementById('crudBodegaSelect');
+      const editarProductoSelect = document.getElementById('editarProductoSelect');
+      if (!crudBodegaSelect || !editarProductoSelect) return;
+
+      const bodegaSeleccionada = crudBodegaSelect.value ? parseInt(crudBodegaSelect.value) : null;
+      
+      crudBodegaSelect.innerHTML = '';
+      bodegas.forEach(b => {
+        const option = document.createElement('option');
+        option.value = b.id;
+        option.textContent = b.nombre;
+        crudBodegaSelect.appendChild(option);
+      });
+      
+      if (bodegaSeleccionada && bodegas.some(b => b.id === bodegaSeleccionada)) {
+        crudBodegaSelect.value = bodegaSeleccionada;
+      }
+      
+      const bodegaId = parseInt(crudBodegaSelect.value);
+      const bodegaActual = bodegas.find(b => b.id === bodegaId);
+      editarProductoSelect.innerHTML = '';
+      if (bodegaActual) {
+        bodegaActual.productos.forEach(p => {
+          const option = document.createElement('option');
+          option.value = p.idProd;
+          option.textContent = `${p.nombre} (stock: ${p.stock})`;
+          editarProductoSelect.appendChild(option);
+        });
+      }
+    }
+
+    function actualizarSelectores() {
+      actualizarSelectoresMovimiento();
+      actualizarSelectoresCrud();
+    }
+
+    function agregarProducto() {
+      const crudBodegaSelect = document.getElementById('crudBodegaSelect');
+      const productoNombreInput = document.getElementById('productoNombre');
+      const stockInicialInput = document.getElementById('productoStockInicial');
+      
+      const bodegaId = parseInt(crudBodegaSelect.value);
+      const nombre = productoNombreInput.value.trim();
+      let stockInicial = parseInt(stockInicialInput.value);
+      
+      if (!nombre) {
+        alert('Debe ingresar un nombre para el producto');
+        return;
+      }
+      if (isNaN(stockInicial) || stockInicial < 0) {
+        stockInicial = 0;
+      }
+      
+      const bodega = bodegas.find(b => b.id === bodegaId);
+      if (!bodega) {
+        alert('Bodega no encontrada');
+        return;
+      }
+      
+      const existe = bodega.productos.some(p => p.nombre.toLowerCase() === nombre.toLowerCase());
+      if (existe) {
+        alert('Ya existe un producto con ese nombre en esta bodega');
+        return;
+      }
+      
+      const nuevoId = generarNuevoIdProd(bodega);
+      const nuevoProducto = {
+        idProd: nuevoId,
+        nombre: nombre,
+        stock: stockInicial,
+        entradasAcum: 0,
+        salidasAcum: 0
+      };
+      bodega.productos.push(nuevoProducto);
+      
+      productoNombreInput.value = '';
+      stockInicialInput.value = '0';
+      
+      renderizarTabla();
+      actualizarSelectores();
+      guardarEnLocalStorage();
+      alert('Producto agregado correctamente');
+    }
+
+    function editarProducto() {
+      const crudBodegaSelect = document.getElementById('crudBodegaSelect');
+      const editarProductoSelect = document.getElementById('editarProductoSelect');
+      const nuevoNombreInput = document.getElementById('editarNombre');
+      const nuevoStockInput = document.getElementById('editarStock');
+      
+      const bodegaId = parseInt(crudBodegaSelect.value);
+      const productoId = parseInt(editarProductoSelect.value);
+      const nuevoNombre = nuevoNombreInput.value.trim();
+      let nuevoStock = parseInt(nuevoStockInput.value);
+      
+      const bodega = bodegas.find(b => b.id === bodegaId);
+      if (!bodega) {
+        alert('Bodega no encontrada');
+        return;
+      }
+      const producto = bodega.productos.find(p => p.idProd === productoId);
+      if (!producto) {
+        alert('Producto no encontrado');
+        return;
+      }
+      
+      if (nuevoNombre !== '') {
+        const existe = bodega.productos.some(p => p.idProd !== productoId && p.nombre.toLowerCase() === nuevoNombre.toLowerCase());
+        if (existe) {
+          alert('Ya existe otro producto con ese nombre en esta bodega');
+          return;
+        }
+        producto.nombre = nuevoNombre;
+      }
+      
+      if (!isNaN(nuevoStock) && nuevoStock >= 0) {
+        producto.stock = nuevoStock;
+      }
+      
+      nuevoNombreInput.value = '';
+      nuevoStockInput.value = '';
+      
+      renderizarTabla();
+      actualizarSelectores();
+      guardarEnLocalStorage();
+      alert('Producto editado correctamente');
+    }
+
+    function eliminarProducto() {
+      const crudBodegaSelect = document.getElementById('crudBodegaSelect');
+      const editarProductoSelect = document.getElementById('editarProductoSelect');
+      
+      const bodegaId = parseInt(crudBodegaSelect.value);
+      const productoId = parseInt(editarProductoSelect.value);
+      
+      const bodega = bodegas.find(b => b.id === bodegaId);
+      if (!bodega) {
+        alert('Bodega no encontrada');
+        return;
+      }
+      const productoIndex = bodega.productos.findIndex(p => p.idProd === productoId);
+      if (productoIndex === -1) {
+        alert('Producto no encontrado');
+        return;
+      }
+      
+      if (confirm(`¿Eliminar el producto "${bodega.productos[productoIndex].nombre}" de ${bodega.nombre}?`)) {
+        bodega.productos.splice(productoIndex, 1);
+        renderizarTabla();
+        actualizarSelectores();
+        guardarEnLocalStorage();
+        alert('Producto eliminado');
+      }
+    }
+
+    function configurarEventosFormularioMovimiento() {
       const btnEntrada = document.getElementById('btnEntrada');
       const btnSalida = document.getElementById('btnSalida');
       const selectBodega = document.getElementById('bodegaSelect');
@@ -228,7 +410,7 @@
       if (!btnEntrada || !btnSalida) return;
 
       selectBodega.addEventListener('change', () => {
-        actualizarSelectores();
+        actualizarSelectoresMovimiento();
       });
 
       function obtenerDatosFormulario() {
@@ -236,7 +418,7 @@
         const productoId = parseInt(selectProducto.value);
         let cantidad = parseFloat(cantidadInput.value);
         if (isNaN(cantidad) || cantidad <= 0) {
-          alert('Ingrese una cantidad válida mayor a cero');
+          alert('Ingrese una cantidad valida mayor a cero');
           return null;
         }
         return { bodegaId, productoId, cantidad };
@@ -259,11 +441,34 @@
       });
     }
 
-    
+    function configurarEventosCrud() {
+      const btnAgregar = document.getElementById('btnAgregarProducto');
+      const btnEditar = document.getElementById('btnEditarProducto');
+      const btnEliminar = document.getElementById('btnEliminarProducto');
+      const crudBodegaSelect = document.getElementById('crudBodegaSelect');
+      
+      if (btnAgregar) {
+        btnAgregar.addEventListener('click', agregarProducto);
+      }
+      if (btnEditar) {
+        btnEditar.addEventListener('click', editarProducto);
+      }
+      if (btnEliminar) {
+        btnEliminar.addEventListener('click', eliminarProducto);
+      }
+      if (crudBodegaSelect) {
+        crudBodegaSelect.addEventListener('change', () => {
+          actualizarSelectoresCrud();
+        });
+      }
+    }
+
     function init() {
-      actualizarSelectores();   // llenar selects según modelo
-      renderizarTabla();        // mostrar tabla con datos iniciales
-      configurarEventosFormulario();
+      cargarDesdeLocalStorage();   
+      actualizarSelectores();
+      renderizarTabla();
+      configurarEventosFormularioMovimiento();
+      configurarEventosCrud();
     }
 
     init();
