@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Liquidacion de sueldo y solicitud de anticipo</title>
+</head>
+<body bgcolor="white">
+  <header>
+    <h1>Liquidacion de Sueldo</h1>
+    <p>Documento preparado para revision e impresion.</p>
+    <hr>
+  </header>
+
+  <main>
+    <section>
+      <h2>Datos de la Empresa</h2>
+      <p><strong>Empresa:</strong> ________________________________</p>
+      <p><strong>RUT:</strong> ________________________________</p>
+      <p><strong>Direccion:</strong> ________________________________</p>
+      <p><strong>Comuna:</strong> ________________________________</p>
+      <p><strong>Giro:</strong> ________________________________</p>
+    </section>
+
+    <hr>
+
+    <section>
+      <h2>Datos del Trabajador</h2>
+      <p><strong>Nombre completo:</strong> ________________________________</p>
+      <p><strong>RUT:</strong> ________________________________</p>
+      <p><strong>Cargo:</strong> ________________________________</p>
+      <p><strong>Centro de costo / Area:</strong> ________________________________</p>
+      <p><strong>Fecha de ingreso:</strong> ____ / ____ / ________</p>
+      <p><strong>Periodo remuneracion:</strong> ________________________________</p>
+      <p><strong>Dias trabajados:</strong> ________________________________</p>
+    </section>
+
+    <hr>
+
+    <section>
+      <h2>Detalle de Haberes</h2>
+      <table border="1" width="100%" cellpadding="8" cellspacing="0">
+        <thead>
+          <tr>
+            <th align="left">Concepto</th>
+            <th align="right">Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Sueldo base</td><td align="right">$ __________________</td></tr>
+          <tr><td>Gratificacion</td><td align="right">$ __________________</td></tr>
+          <tr><td>Horas extra</td><td align="right">$ __________________</td></tr>
+          <tr><td>Bono de asistencia</td><td align="right">$ __________________</td></tr>
+          <tr><td>Bono de locomocion</td><td align="right">$ __________________</td></tr>
+          <tr><td>Bono de colacion</td><td align="right">$ __________________</td></tr>
+          <tr><td>Otros haberes imponibles</td><td align="right">$ __________________</td></tr>
+          <tr><td>Otros haberes no imponibles</td><td align="right">$ __________________</td></tr>
+          <tr><td><strong>Total haberes</strong></td><td align="right"><strong>$ __________________</strong></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <br>
+
+    <section>
+      <h2>Detalle de Descuentos</h2>
+      <table border="1" width="100%" cellpadding="8" cellspacing="0">
+        <thead>
+          <tr>
+            <th align="left">Concepto</th>
+            <th align="right">Monto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>AFP</td><td align="right">$ __________________</td></tr>
+          <tr><td>Salud</td><td align="right">$ __________________</td></tr>
+          <tr><td>Seguro de cesantia</td><td align="right">$ __________________</td></tr>
+          <tr><td>Impuesto Unico</td><td align="right">$ __________________</td></tr>
+          <tr><td>Anticipo</td><td align="right">$ __________________</td></tr>
+          <tr><td>Prstamo empresa</td><td align="right">$ __________________</td></tr>
+          <tr><td>Otros descuentos</td><td align="right">$ __________________</td></tr>
+          <tr><td><strong>Total descuentos</strong></td><td align="right"><strong>$ __________________</strong></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <br>
+
+    <section>
+      <h2>Liquido a Pagar</h2>
+      <p><strong>Total imponible:</strong> $ __________________</p>
+      <p><strong>Total no imponible:</strong> $ __________________</p>
+      <p><strong>Total descuentos:</strong> $ __________________</p>
+      <p><strong>Liquido a pagar:</strong> $ __________________</p>
+      <p><strong>Forma de pago:</strong> ________________________________</p>
+      <p><strong>Fecha de pago:</strong> ____ / ____ / ________</p>
+    </section>
+
+    <hr>
+
+    <section>
+      <h2>Recepcion y Firma</h2>
+      <p>Declaro haber recibido de mi empleador el detalle de las remuneraciones, haberes y descuentos correspondientes al periodo senalado en esta liquidacion.</p>
+      <br><br>
+      <table width="100%">
+        <tr>
+          <td align="center">_______________________________</td>
+          <td align="center">_______________________________</td>
+        </tr>
+        <tr>
+          <td align="center">Firma trabajador</td>
+          <td align="center">Firma empleador</td>
+        </tr>
+      </table>
+    </section>
+
+    <hr>
+
+    <section>
+      <h2>Formulario de Solicitud de Anticipo</h2>
+      <form id="formAnticipo">
+        <p>
+          <label for="nombre">Nombre del trabajador:</label><br>
+          <input type="text" id="nombre" name="nombre">
+        </p>
+
+        <p>
+          <label for="rut">RUT:</label><br>
+          <input type="text" id="rut" name="rut">
+        </p>
+
+        <p>
+          <label for="fecha">Fecha de solicitud:</label><br>
+          <input type="date" id="fecha" name="fecha">
+        </p>
+
+        <p>
+          <label for="monto">Monto solicitado:</label><br>
+          <input type="number" id="monto" name="monto" min="0" step="1">
+        </p>
+
+        <p>
+          <label for="motivo">Motivo del anticipo:</label><br>
+          <textarea id="motivo" name="motivo" rows="5" cols="50"></textarea>
+        </p>
+
+        <p>
+          <label for="descuento">Descartar en liquidacion del mes de:</label><br>
+          <input type="text" id="descuento" name="descuento">
+        </p>
+
+        <p>
+          <label>
+            <input type="checkbox" name="autorizacion"> Autorizo el descuento del anticipo en mi proxima liquidacion de sueldo.
+          </label>
+        </p>
+
+        <p>
+          <button type="submit">Guardar solicitud</button>
+          <button type="reset">Limpiar formulario</button>
+        </p>
+      </form>
+
+      <br><br>
+
+      <table width="100%">
+        <tr>
+          <td align="center">_______________________________</td>
+          <td align="center">_______________________________</td>
+        </tr>
+        <tr>
+          <td align="center">Firma trabajador</td>
+          <td align="center">Aprobacion jefatura / RR.HH.</td>
+        </tr>
+      </table>
+    </section>
+
+    <hr>
+    <section>
+      <h2>Anticipos Guardados</h2>
+      <table border="1" width="100%" cellpadding="8" cellspacing="0" id="tablaAnticipos">
+        <thead>
+          <tr>
+            <th align="left">Fecha</th>
+            <th align="left">Nombre</th>
+            <th align="left">RUT</th>
+            <th align="right">Monto</th>
+            <th align="left">Motivo</th>
+            <th align="left">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+      <p><small>Nota: Los datos se guardan en el navegador (localStorage). Si borras el cache, se pierden.</small></p>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      cargarAnticipos();
+    });
+
+    document.getElementById('formAnticipo').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      var nombre = document.getElementById('nombre').value.trim();
+      var rut = document.getElementById('rut').value.trim();
+      var fecha = document.getElementById('fecha').value;
+      var monto = document.getElementById('monto').value;
+      var motivo = document.getElementById('motivo').value.trim();
+      var descuento = document.getElementById('descuento').value.trim();
+      var autorizacion = document.querySelector('input[name="autorizacion"]').checked;
+
+      if (!nombre || !rut || !fecha || !monto || !motivo) {
+        alert('Por favor completa todos los campos obligatorios.');
+        return;
+      }
+
+      var anticipo = {
+        id: Date.now(),
+        nombre: nombre,
+        rut: rut,
+        fecha: fecha,
+        monto: monto,
+        motivo: motivo,
+        descuento: descuento,
+        autorizacion: autorizacion
+      };
+
+      guardarAnticipo(anticipo);
+      alert('Solicitud de anticipo guardada correctamente.');
+      document.getElementById('formAnticipo').reset();
+      cargarAnticipos();
+    });
+
+    function guardarAnticipo(anticipo) {
+      var anticipos = JSON.parse(localStorage.getItem('anticipos') || '[]');
+      anticipos.push(anticipo);
+      localStorage.setItem('anticipos', JSON.stringify(anticipos));
+    }
+
+    function cargarAnticipos() {
+      var anticipos = JSON.parse(localStorage.getItem('anticipos') || '[]');
+      var tbody = document.querySelector('#tablaAnticipos tbody');
+      tbody.innerHTML = '';
+
+      if (anticipos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" align="center">No hay anticipos guardados.</td></tr>';
+        return;
+      }
+
+      anticipos.forEach(function(a) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = 
+          '<td>' + a.fecha + '</td>' +
+          '<td>' + a.nombre + '</td>' +
+          '<td>' + a.rut + '</td>' +
+          '<td align="right">$ ' + parseInt(a.monto).toLocaleString('es-CL') + '</td>' +
+          '<td>' + a.motivo + '</td>' +
+          '<td><button type="button" onclick="eliminarAnticipo(' + a.id + ')">Eliminar</button></td>';
+        tbody.appendChild(tr);
+      });
+    }
+
+    function eliminarAnticipo(id) {
+      if (!confirm('Estas seguro de eliminar este anticipo?')) return;
+      var anticipos = JSON.parse(localStorage.getItem('anticipos') || '[]');
+      anticipos = anticipos.filter(function(a) { return a.id !== id; });
+      localStorage.setItem('anticipos', JSON.stringify(anticipos));
+      cargarAnticipos();
+    }
+  </script>
+</body>
+</html>
