@@ -4,131 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Productos</title>
+    <link rel="stylesheet" href="styles.css">
 
-    <style>
-        *{
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <script>
+      try {
+        const theme = localStorage.getItem('asistencia-theme-v1') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    </script>
 
-        body{
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-        }
-
-        header{
-            background-color: #1f2937;
-            color: white;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .buscador{
-            margin-top: 15px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .buscador input{
-            width: 60%;
-            max-width: 500px;
-            padding: 12px;
-            border: none;
-            border-radius: 8px 0 0 8px;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .buscador button{
-            padding: 12px 20px;
-            border: none;
-            background-color: #2563eb;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 0 8px 8px 0;
-        }
-
-        .buscador button:hover{
-            background-color: #1d4ed8;
-        }
-
-        .catalogo{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            padding: 30px;
-        }
-
-        .tarjeta{
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-
-        .tarjeta:hover{
-            transform: scale(1.03);
-        }
-
-        .tarjeta img{
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-        }
-
-        .contenido{
-            padding: 15px;
-        }
-
-        .contenido h3{
-            margin-bottom: 10px;
-            color: #111827;
-        }
-
-        .contenido p{
-            color: #555;
-            margin-bottom: 10px;
-        }
-
-        .precio{
-            font-size: 20px;
-            color: #16a34a;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
-        .boton{
-            display: inline-block;
-            width: 100%;
-            text-align: center;
-            background-color: #2563eb;
-            color: white;
-            padding: 10px;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-
-        .boton:hover{
-            background-color: #1d4ed8;
-        }
-    </style>
 </head>
 <body>
-
-    <header>
-        <h1>Catálogo de Productos</h1>
-
-        <div class="buscador">
-            <input type="text" placeholder="Buscar productos...">
-            <button>Buscar</button>
+    <header class="app-header">
+        <div class="brand">
+            <div class="logo" aria-hidden="true">🛡️</div>
+            <div class="brand-text">
+                <h1>Seguridad LTDA</h1>
+                <p>Sistema ERP Integrado</p>
+            </div>
         </div>
+        <nav class="app-nav">
+            <a href="asistencia.html" class="nav-link">Asistencia</a>
+            <a href="bodegas.html" class="nav-link">Bodegas</a>
+            <a href="catalogo.html" class="nav-link active">Catálogo</a>
+            <a href="ficha-personal.html" class="nav-link">Ficha Personal</a>
+            <a href="ficha-producto.html" class="nav-link">Ficha Producto</a>
+            <a href="liquidaciones.html" class="nav-link">Liquidaciones</a>
+            <a href="vacaciones.html" class="nav-link">Vacaciones</a>
+        </nav>
     </header>
 
-    <main class="catalogo">
+    <main class="app">
+        <div class="panel">
+            <h1 style="text-align: center; margin-bottom: var(--space-4);">Catálogo de Productos</h1>
+            <div class="buscador">
+                <input type="text" placeholder="Buscar productos...">
+                <button>Buscar</button>
+            </div>
+            <main class="catalogo">
 
         <div class="tarjeta">
             <img src="https://via.placeholder.com/300x220" alt="Producto 1">
@@ -138,7 +51,7 @@
                 <p>Notebook de alto rendimiento para juegos y diseño.</p>
                 <div class="precio">$850.000</div>
 
-                <a href="#" class="boton">Ver Producto</a>
+                <a href="ficha-producto.html?prod=101" class="boton">Ver Producto</a>
             </div>
         </div>
 
@@ -150,7 +63,7 @@
                 <p>Mouse ergonómico con conexión Bluetooth.</p>
                 <div class="precio">$18.990</div>
 
-                <a href="#" class="boton">Ver Producto</a>
+                <a href="ficha-producto.html?prod=102" class="boton">Ver Producto</a>
             </div>
         </div>
 
@@ -162,7 +75,7 @@
                 <p>Teclado RGB ideal para gaming y oficina.</p>
                 <div class="precio">$45.500</div>
 
-                <a href="#" class="boton">Ver Producto</a>
+                <a href="ficha-producto.html?prod=103" class="boton">Ver Producto</a>
             </div>
         </div>
 
@@ -174,11 +87,12 @@
                 <p>Pantalla Full HD con excelente calidad de imagen.</p>
                 <div class="precio">$129.990</div>
 
-                <a href="#" class="boton">Ver Producto</a>
+                <a href="ficha-producto.html?prod=101" class="boton">Ver Producto</a>
             </div>
         </div>
 
     </main>
-
+        </div>
+    </main>
 </body>
 </html>

@@ -3,73 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <title>Solicitud de Vacaciones - Portal del Empleado</title>
-    <!-- Sin CSS, diseño por defecto del navegador -->
+    <link rel="stylesheet" href="styles.css">
+
+    <script>
+      try {
+        const theme = localStorage.getItem('asistencia-theme-v1') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    </script>
+
 </head>
 <body>
+    <header class="app-header">
+        <div class="brand">
+            <div class="logo" aria-hidden="true">🛡️</div>
+            <div class="brand-text">
+                <h1>Seguridad LTDA</h1>
+                <p>Sistema ERP Integrado</p>
+            </div>
+        </div>
+        <nav class="app-nav">
+            <a href="asistencia.html" class="nav-link">Asistencia</a>
+            <a href="bodegas.html" class="nav-link">Bodegas</a>
+            <a href="catalogo.html" class="nav-link">Catálogo</a>
+            <a href="ficha-personal.html" class="nav-link">Ficha Personal</a>
+            <a href="ficha-producto.html" class="nav-link">Ficha Producto</a>
+            <a href="liquidaciones.html" class="nav-link">Liquidaciones</a>
+            <a href="vacaciones.html" class="nav-link active">Vacaciones</a>
+        </nav>
+    </header>
 
-<h1>Solicitud de Vacaciones - Portal del Empleado</h1>
 
-<!-- Datos del empleado -->
-<p><strong>Empleado:</strong> EmpleadoEjemplo | <strong>ID:</strong> RRHH-1042 | <strong>Departamento:</strong> Operaciones</p>
-<hr>
-
-<!-- Resumen de vacaciones -->
-<h2>Resumen de Vacaciones</h2>
-<table border="1">
-    <thead>
-        <tr><th>Concepto</th><th>Días</th></tr>
-    </thead>
-    <tbody>
-        <tr><td>Días totales anuales</td><td id="totalDays">20</td></tr>
-        <tr><td>Días ya aprobados / tomados</td><td id="approvedDays">0</td></tr>
-        <tr><td>Días en solicitudes pendientes</td><td id="pendingDays">0</td></tr>
-        <tr><td><strong>Días disponibles para nueva solicitud</strong></td><td id="availableDays"><strong>0</strong></td></tr>
-    </tbody>
-</table>
-<br>
-
-<!-- Formulario de nueva solicitud con campos de tipo date (calendario nativo) -->
-<h2>Nueva Solicitud de Vacaciones</h2>
-<form id="vacationForm">
-    <label>Fecha de inicio:</label>
-    <input type="date" id="startDate" required><br><br>
-
-    <label>Fecha de término:</label>
-    <input type="date" id="endDate" required><br><br>
-
-    <label>Días hábiles calculados:</label>
-    <input type="text" id="calculatedDays" readonly value="0"><br><br>
-
-    <label>Motivo (opcional):</label><br>
-    <textarea id="reason" rows="2" cols="40"></textarea><br><br>
-
-    <button type="submit">Enviar solicitud</button>
-</form>
-
-<div id="formFeedback"></div>
-
-<!-- Solicitudes Pendientes (solo botones Aprobar/Rechazar) -->
-<h2>Solicitudes Pendientes (por aprobar)</h2>
-<table border="1" id="pendingTable">
-    <thead>
-        <tr><th>Desde</th><th>Hasta</th><th>Días</th><th>Motivo</th><th>Acciones</th></tr>
-    </thead>
-    <tbody id="pendingTableBody">
-        <tr><td colspan="5">No hay solicitudes pendientes</td></tr>
-    </tbody>
-</table>
-
-<!-- Vacaciones Aprobadas -->
-<h2>Vacaciones Aprobadas / Historial</h2>
-<table border="1" id="approvedTable">
-    <thead>
-        <tr><th>Desde</th><th>Hasta</th><th>Días</th><th>Motivo</th><th>Estado</th></tr>
-    </thead>
-    <tbody id="approvedTableBody">
-        <tr><td colspan="5">No hay registros aprobados</td></tr>
-    </tbody>
-</table>
-
+        <main class="app">
+            <div class="panel" style="text-align: center; margin-bottom: 2rem;">
+                <h1>Solicitud de Vacaciones</h1>
+                <p><strong>Empleado:</strong> EmpleadoEjemplo | <strong>ID:</strong> RRHH-1042 | <strong>Departamento:</strong> Operaciones</p>
+            </div>
+            
+            <div class="grid">
+                <div class="panel">
+                    <h2>Nueva Solicitud de Vacaciones</h2>
+                    <form id="vacationForm">
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label>Fecha de inicio:</label>
+                            <input type="date" id="startDate" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label>Fecha de término:</label>
+                            <input type="date" id="endDate" required>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label>Días hábiles calculados:</label>
+                            <input type="text" id="calculatedDays" readonly value="0">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 15px;">
+                            <label>Motivo (opcional):</label>
+                            <textarea id="reason" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" style="width: 100%;">Enviar solicitud</button>
+                    </form>
+                    <div id="formFeedback" style="margin-top: 15px;"></div>
+                </div>
+                
+                <div class="panel">
+                    <h2>Resumen de Vacaciones</h2>
+                    <table border="1">
+                        <thead>
+                            <tr><th>Concepto</th><th>Días</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Días totales anuales</td><td id="totalDays">20</td></tr>
+                            <tr><td>Días ya aprobados / tomados</td><td id="approvedDays">0</td></tr>
+                            <tr><td>Días en solicitudes pendientes</td><td id="pendingDays">0</td></tr>
+                            <tr><td><strong>Días disponibles</strong></td><td id="availableDays"><strong>0</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Solicitudes Pendientes (por aprobar)</h2>
+                <div class="table-wrap">
+                    <table border="1" id="pendingTable">
+                        <thead>
+                            <tr><th>Desde</th><th>Hasta</th><th>Días</th><th>Motivo</th><th>Acciones</th></tr>
+                        </thead>
+                        <tbody id="pendingTableBody">
+                            <tr><td colspan="5">No hay solicitudes pendientes</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <h2>Vacaciones Aprobadas / Historial</h2>
+                <div class="table-wrap">
+                    <table border="1" id="approvedTable">
+                        <thead>
+                            <tr><th>Desde</th><th>Hasta</th><th>Días</th><th>Motivo</th><th>Estado</th></tr>
+                        </thead>
+                        <tbody id="approvedTableBody">
+                            <tr><td colspan="5">No hay registros aprobados</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
 <script>
     // ---------- DATOS INICIALES ----------
     const TOTAL_DAYS = 20;
