@@ -981,6 +981,79 @@ button:active, .btn:active, .boton:active {
 }
 
 /* ----------------------------------------------------
+   PRINT STYLES (@media print)
+   ---------------------------------------------------- */
+@media print {
+  /* Hide elements that shouldn't appear on paper pay slip */
+  body {
+    background: none !important;
+    color: #000 !important;
+    padding: 0 !important;
+    font-size: 12pt !important;
+  }
+
+  .app-header,
+  .nav-link,
+  .app-nav,
+  .header-actions,
+  .toolbar,
+  #themeToggle,
+  .generator-panel,
+  .collapsible-trigger,
+  .collapsible-content,
+  #formAnticipo,
+  #formAnticipo + *,
+  h2:has(#formAnticipo),
+  section:has(#tablaAnticipos),
+  .footer-note,
+  .botones,
+  button,
+  hr:last-of-type,
+  table:has(#tablaAnticipos),
+  p:has(small) {
+    display: none !important;
+  }
+
+  .app {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .panel, section.panel {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin-bottom: 2rem !important;
+    overflow: visible !important;
+  }
+
+  table {
+    border: 1px solid #333 !important;
+    background: none !important;
+    box-shadow: none !important;
+    color: #000 !important;
+  }
+
+  th {
+    background-color: #eee !important;
+    border-bottom: 1px solid #333 !important;
+    color: #000 !important;
+  }
+
+  td {
+    border-bottom: 1px dotted #666 !important;
+  }
+
+  .printable-liquidacion {
+    page-break-inside: avoid;
+  }
+}
+
+/* ----------------------------------------------------
    MEDIA QUERIES FOR RESPONSIVENESS
    ---------------------------------------------------- */
 @media (max-width: 1024px) {

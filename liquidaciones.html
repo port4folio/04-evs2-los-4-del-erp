@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Liquidacion de sueldo y solicitud de anticipo</title>
-    <link rel="stylesheet" href="styles.css">
-
-    <script>
-      try {
-        const theme = localStorage.getItem('asistencia-theme-v1') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        document.documentElement.setAttribute('data-theme', theme);
-      } catch (e) {}
-    </script>
-
+  <title>Liquidación de Sueldo y Solicitud de Anticipo</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <script>
+    try {
+      const theme = localStorage.getItem('asistencia-theme-v1') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {}
+  </script>
 </head>
 <body>
     <header class="app-header">
@@ -35,194 +34,445 @@
     </header>
 
 <main class="app">
-    <div class="panel" style="text-align: center; margin-bottom: 2rem;">
-        <h1>Liquidación de Sueldo</h1>
-        <p>Documento preparado para revisión e impresión.</p>
+    <!-- PANEL DE CONTROL GENERADOR (Solo se ve en pantalla, oculto en impresión) -->
+    <div class="panel generator-panel">
+        <h2 style="border-bottom: 2px solid var(--color-border); padding-bottom: 10px; margin-bottom: 15px;">Panel de Control: Generador de Liquidación</h2>
+        <p style="color: var(--color-text-muted); font-size: var(--text-sm); margin-bottom: 20px;">
+            Ingresa los parámetros del empleado, ganancias (haberes) y deducciones (descuentos). El sistema calculará el total imponible y el líquido a pagar en tiempo real, rellenando la liquidación oficial lista para imprimir.
+        </p>
+        
+        <form id="paySlipGeneratorForm" onsubmit="event.preventDefault(); generatePaySlip();">
+            <div class="section-title">1. Datos del Empleador y Trabajador</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="genEmpresa">Nombre de la Empresa</label>
+                    <input type="text" id="genEmpresa" value="Seguridad LTDA" required>
+                </div>
+                <div class="form-group">
+                    <label for="genEmpresaRut">RUT de la Empresa</label>
+                    <input type="text" id="genEmpresaRut" value="76.998.432-K" required>
+                </div>
+                <div class="form-group">
+                    <label for="genTrabajador">Nombre Completo Trabajador</label>
+                    <input type="text" id="genTrabajador" value="Ana Morales" required>
+                </div>
+                <div class="form-group">
+                    <label for="genTrabajadorRut">RUT Trabajador</label>
+                    <input type="text" id="genTrabajadorRut" value="18.456.789-0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genCargo">Cargo del Trabajador</label>
+                    <input type="text" id="genCargo" value="Guardia Especialista" required>
+                </div>
+                <div class="form-group">
+                    <label for="genCosto">Centro de Costo</label>
+                    <input type="text" id="genCosto" value="Zona Centro" required>
+                </div>
+                <div class="form-group">
+                    <label for="genPeriodo">Período Remuneración</label>
+                    <input type="text" id="genPeriodo" value="Mayo 2026" required>
+                </div>
+                <div class="form-group">
+                    <label for="genDias">Días Trabajados</label>
+                    <input type="number" id="genDias" value="30" min="0" max="31" required>
+                </div>
+            </div>
+
+            <div class="section-title">2. Ingreso de Haberes (Ganancias)</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="genSueldoBase">Sueldo Base ($)</label>
+                    <input type="number" id="genSueldoBase" value="680000" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genGratificacion">Gratificación Legal ($)</label>
+                    <input type="number" id="genGratificacion" value="125000" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genHorasExtra">Horas Extraordinarias ($)</label>
+                    <input type="number" id="genHorasExtra" value="48000" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genBonoAsistencia">Bono de Asistencia ($)</label>
+                    <input type="number" id="genBonoAsistencia" value="30000" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genBonoLocomocion">Bono de Locomoción ($)</label>
+                    <input type="number" id="genBonoLocomocion" value="45000" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genBonoColacion">Bono de Colación ($)</label>
+                    <input type="number" id="genBonoColacion" value="45000" min="0" required>
+                </div>
+            </div>
+
+            <div class="section-title">3. Ingreso de Descuentos (Deducciones)</div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="genAfp">AFP Previsional ($)</label>
+                    <input type="number" id="genAfp" value="78200" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genSalud">Salud Fonasa/Isapre ($)</label>
+                    <input type="number" id="genSalud" value="47600" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genSeguroCesantia">Seguro de Cesantía ($)</label>
+                    <input type="number" id="genSeguroCesantia" value="4500" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genImpuestoUnico">Impuesto Único ($)</label>
+                    <input type="number" id="genImpuestoUnico" value="0" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genAnticipo">Anticipo Solicitado ($)</label>
+                    <input type="number" id="genAnticipo" value="50000" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="genPrestamo">Préstamo Empresa ($)</label>
+                    <input type="number" id="genPrestamo" value="0" min="0" required>
+                </div>
+            </div>
+
+            <div class="botones" style="margin-top: 20px;">
+                <button type="submit" class="btn-success" style="width: 48%;">Generar Liquidación</button>
+                <button type="button" class="btn-secondary" onclick="imprimirLiquidacion();" style="width: 48%;">Imprimir Pay Slip</button>
+            </div>
+        </form>
     </div>
-    <section class="panel">
-      <h2>Datos de la Empresa</h2>
-      <p><strong>Empresa:</strong> ________________________________</p>
-      <p><strong>RUT:</strong> ________________________________</p>
-      <p><strong>Direccion:</strong> ________________________________</p>
-      <p><strong>Comuna:</strong> ________________________________</p>
-      <p><strong>Giro:</strong> ________________________________</p>
-    </section>
 
-    <hr>
+    <!-- DOCUMENTO DE LIQUIDACIÓN DE SUELDO OFICIAL (Sección imprimible) -->
+    <div class="panel printable-liquidacion">
+      <div style="text-align: center; margin-bottom: 1.5rem;">
+          <h2 style="margin: 0; font-size: var(--text-lg); text-transform: uppercase;">Liquidación de Sueldo</h2>
+          <p style="margin: 3px 0 0; color: var(--color-text-muted); font-size: var(--text-sm);">Documento Oficial de Pago de Remuneraciones</p>
+      </div>
 
-    <section class="panel">
-      <h2>Datos del Trabajador</h2>
-      <p><strong>Nombre completo:</strong> ________________________________</p>
-      <p><strong>RUT:</strong> ________________________________</p>
-      <p><strong>Cargo:</strong> ________________________________</p>
-      <p><strong>Centro de costo / Area:</strong> ________________________________</p>
-      <p><strong>Fecha de ingreso:</strong> ____ / ____ / ________</p>
-      <p><strong>Periodo remuneracion:</strong> ________________________________</p>
-      <p><strong>Dias trabajados:</strong> ________________________________</p>
-    </section>
+      <!-- Sección Empresa -->
+      <section style="margin-bottom: 20px; border-bottom: 1px dashed var(--color-border); padding-bottom: 15px;">
+        <h3 style="font-size: 1.1rem; color: var(--color-primary); margin-bottom: 10px;">Datos del Empleador</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <p style="margin: 0;"><strong>Razón Social:</strong> <span id="lblEmpresa" style="font-weight: 500;">Seguridad LTDA</span></p>
+            <p style="margin: 0;"><strong>RUT:</strong> <span id="lblEmpresaRut" style="font-weight: 500;">76.998.432-K</span></p>
+            <p style="margin: 0;"><strong>Giro:</strong> <span id="lblGiro" style="font-weight: 500;">Servicios de Seguridad Integral</span></p>
+            <p style="margin: 0;"><strong>Dirección:</strong> <span id="lblDireccion" style="font-weight: 500;">Av. Providencia 1040, Providencia</span></p>
+        </div>
+      </section>
 
-    <hr>
+      <!-- Sección Trabajador -->
+      <section style="margin-bottom: 25px; border-bottom: 1px dashed var(--color-border); padding-bottom: 15px;">
+        <h3 style="font-size: 1.1rem; color: var(--color-primary); margin-bottom: 10px;">Datos del Trabajador</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+            <p style="margin: 0;"><strong>Nombre completo:</strong> <span id="lblTrabajador" style="font-weight: 500;">Ana Morales</span></p>
+            <p style="margin: 0;"><strong>RUT:</strong> <span id="lblTrabajadorRut" style="font-weight: 500;">18.456.789-0</span></p>
+            <p style="margin: 0;"><strong>Cargo:</strong> <span id="lblCargo" style="font-weight: 500;">Guardia Especialista</span></p>
+            <p style="margin: 0;"><strong>Centro de Costo:</strong> <span id="lblCosto" style="font-weight: 500;">Zona Centro</span></p>
+            <p style="margin: 0;"><strong>Período Remuneración:</strong> <span id="lblPeriodo" style="font-weight: 500; color: var(--color-primary);">Mayo 2026</span></p>
+            <p style="margin: 0;"><strong>Días Trabajados:</strong> <span id="lblDias" style="font-weight: 500;">30</span></p>
+        </div>
+      </section>
 
-    <section class="panel">
-      <h2>Detalle de Haberes</h2>
-      <table border="1" width="100%" cellpadding="8" cellspacing="0">
-        <thead>
-          <tr>
-            <th align="left">Concepto</th>
-            <th align="right">Monto</th>
+      <!-- Grid de Tablas Haberes / Descuentos -->
+      <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Detalle de Haberes -->
+        <section>
+          <h3 style="font-size: 1.1rem; color: var(--color-success); margin-bottom: 10px;">Detalle de Haberes</h3>
+          <table border="1" cellpadding="8" cellspacing="0" style="margin-bottom: 0;">
+            <thead>
+              <tr>
+                <th align="left">Concepto</th>
+                <th align="right" style="text-align: right;">Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Sueldo Base</td><td align="right" id="lblSueldoBase" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Gratificación Legal</td><td align="right" id="lblGratificacion" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Horas Extraordinarias</td><td align="right" id="lblHorasExtra" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Bono de Asistencia</td><td align="right" id="lblBonoAsistencia" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Locomoción (No Imp.)</td><td align="right" id="lblBonoLocomocion" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Colación (No Imp.)</td><td align="right" id="lblBonoColacion" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr style="background-color: var(--color-surface-offset);">
+                  <td><strong>Total Haberes</strong></td>
+                  <td align="right" id="lblTotalHaberes" style="font-weight: bold; font-variant-numeric: tabular-nums; color: var(--color-success);">$ 0</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Detalle de Descuentos -->
+        <section>
+          <h3 style="font-size: 1.1rem; color: var(--color-error); margin-bottom: 10px;">Detalle de Descuentos</h3>
+          <table border="1" cellpadding="8" cellspacing="0" style="margin-bottom: 0;">
+            <thead>
+              <tr>
+                <th align="left">Concepto</th>
+                <th align="right" style="text-align: right;">Monto</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>AFP Cotización</td><td align="right" id="lblAfp" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Salud (Fonasa/Isapre)</td><td align="right" id="lblSalud" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Seguro de Cesantía</td><td align="right" id="lblSeguro" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Impuesto Único</td><td align="right" id="lblImpuesto" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Anticipo de Remuneraciones</td><td align="right" id="lblAnticipo" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr><td>Préstamo Empresa</td><td align="right" id="lblPrestamo" style="font-variant-numeric: tabular-nums;">$ 0</td></tr>
+              <tr style="background-color: var(--color-surface-offset);">
+                  <td><strong>Total Descuentos</strong></td>
+                  <td align="right" id="lblTotalDescuentos" style="font-weight: bold; font-variant-numeric: tabular-nums; color: var(--color-error);">$ 0</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+
+      <!-- Resumen Líquido -->
+      <section class="panel" style="margin-top: 25px; background-color: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface-2)); display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; padding: 20px;">
+          <div>
+              <span style="display: block; font-size: var(--text-xs); color: var(--color-text-muted);">Total Imponible</span>
+              <strong id="lblTotalImponible" style="font-size: 1.15rem; font-variant-numeric: tabular-nums; color: var(--color-text);">$ 0</strong>
+          </div>
+          <div>
+              <span style="display: block; font-size: var(--text-xs); color: var(--color-text-muted);">Total No Imponible</span>
+              <strong id="lblTotalNoImponible" style="font-size: 1.15rem; font-variant-numeric: tabular-nums; color: var(--color-text);">$ 0</strong>
+          </div>
+          <div>
+              <span style="display: block; font-size: var(--text-xs); color: var(--color-text-muted);">Total Descuentos</span>
+              <strong id="lblDescuentosResumen" style="font-size: 1.15rem; font-variant-numeric: tabular-nums; color: var(--color-error);">$ 0</strong>
+          </div>
+          <div style="border-left: 2px solid var(--color-border); padding-left: 15px;">
+              <span style="display: block; font-size: var(--text-xs); color: var(--color-text-muted);">Líquido Neto a Pagar</span>
+              <strong id="lblLiquidoPagar" style="font-size: 1.45rem; font-variant-numeric: tabular-nums; color: var(--color-success);">$ 0</strong>
+          </div>
+      </section>
+
+      <!-- Recepción y Firma -->
+      <section style="margin-top: 35px;">
+        <p style="font-size: var(--text-sm); line-height: 1.6; text-align: justify; color: var(--color-text-muted);">
+          Certifico que he recibido de mi empleador, a mi total y entera satisfacción, la suma líquida indicada en esta liquidación de remuneración, la cual corresponde al pago de mis haberes y descuentos del mes indicado.
+        </p>
+        <br><br>
+        <table width="100%" style="box-shadow: none; background: none; border: none; margin-bottom: 0;">
+          <tr style="background: none;">
+            <td align="center" style="border: none; padding-top: 40px; text-align: center;">
+                <div style="border-top: 1px solid var(--color-text-muted); width: 220px; margin: 0 auto; padding-top: 5px;">
+                    <strong>Firma del Trabajador</strong><br>
+                    <span style="font-size: var(--text-xs); color: var(--color-text-muted);">RUT: <span class="sign-worker-rut">18.456.789-0</span></span>
+                </div>
+            </td>
+            <td align="center" style="border: none; padding-top: 40px; text-align: center;">
+                <div style="border-top: 1px solid var(--color-text-muted); width: 220px; margin: 0 auto; padding-top: 5px;">
+                    <strong>Representante Empleador</strong><br>
+                    <span style="font-size: var(--text-xs); color: var(--color-text-muted);">Seguridad LTDA</span>
+                </div>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          <tr><td>Sueldo base</td><td align="right">$ __________________</td></tr>
-          <tr><td>Gratificacion</td><td align="right">$ __________________</td></tr>
-          <tr><td>Horas extra</td><td align="right">$ __________________</td></tr>
-          <tr><td>Bono de asistencia</td><td align="right">$ __________________</td></tr>
-          <tr><td>Bono de locomocion</td><td align="right">$ __________________</td></tr>
-          <tr><td>Bono de colacion</td><td align="right">$ __________________</td></tr>
-          <tr><td>Otros haberes imponibles</td><td align="right">$ __________________</td></tr>
-          <tr><td>Otros haberes no imponibles</td><td align="right">$ __________________</td></tr>
-          <tr><td><strong>Total haberes</strong></td><td align="right"><strong>$ __________________</strong></td></tr>
-        </tbody>
-      </table>
-    </section>
+        </table>
+      </section>
+    </div>
 
-    <br>
-
-    <section class="panel">
-      <h2>Detalle de Descuentos</h2>
-      <table border="1" width="100%" cellpadding="8" cellspacing="0">
-        <thead>
-          <tr>
-            <th align="left">Concepto</th>
-            <th align="right">Monto</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>AFP</td><td align="right">$ __________________</td></tr>
-          <tr><td>Salud</td><td align="right">$ __________________</td></tr>
-          <tr><td>Seguro de cesantia</td><td align="right">$ __________________</td></tr>
-          <tr><td>Impuesto Unico</td><td align="right">$ __________________</td></tr>
-          <tr><td>Anticipo</td><td align="right">$ __________________</td></tr>
-          <tr><td>Prstamo empresa</td><td align="right">$ __________________</td></tr>
-          <tr><td>Otros descuentos</td><td align="right">$ __________________</td></tr>
-          <tr><td><strong>Total descuentos</strong></td><td align="right"><strong>$ __________________</strong></td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <br>
-
-    <section class="panel">
-      <h2>Liquido a Pagar</h2>
-      <p><strong>Total imponible:</strong> $ __________________</p>
-      <p><strong>Total no imponible:</strong> $ __________________</p>
-      <p><strong>Total descuentos:</strong> $ __________________</p>
-      <p><strong>Liquido a pagar:</strong> $ __________________</p>
-      <p><strong>Forma de pago:</strong> ________________________________</p>
-      <p><strong>Fecha de pago:</strong> ____ / ____ / ________</p>
-    </section>
-
-    <hr>
-
-    <section class="panel">
-      <h2>Recepcion y Firma</h2>
-      <p>Declaro haber recibido de mi empleador el detalle de las remuneraciones, haberes y descuentos correspondientes al periodo senalado en esta liquidacion.</p>
-      <br><br>
-      <table width="100%">
-        <tr>
-          <td align="center">_______________________________</td>
-          <td align="center">_______________________________</td>
-        </tr>
-        <tr>
-          <td align="center">Firma trabajador</td>
-          <td align="center">Firma empleador</td>
-        </tr>
-      </table>
-    </section>
-
-    <hr>
-
-    <section class="panel">
+    <!-- FORMULARIO DE ANTICIPOS -->
+    <div class="panel">
       <h2>Formulario de Solicitud de Anticipo</h2>
+      <p style="color: var(--color-text-muted); font-size: var(--text-sm); margin-bottom: 20px;">
+          Los empleados pueden solicitar adelantos del sueldo imponible. Si se aprueba, se añadirá automáticamente a la lista y podrá deducirse en la próxima liquidación generada.
+      </p>
+      
       <form id="formAnticipo">
-        <p>
-          <label for="nombre">Nombre del trabajador:</label><br>
-          <input type="text" id="nombre" name="nombre">
-        </p>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="nombre">Nombre del trabajador</label>
+                <input type="text" id="nombre" name="nombre" required placeholder="Ej: Ana Morales">
+            </div>
+            <div class="form-group">
+                <label for="rut">RUT</label>
+                <input type="text" id="rut" name="rut" required placeholder="Ej: 18.456.789-0">
+            </div>
+            <div class="form-group">
+                <label for="fecha">Fecha de solicitud</label>
+                <input type="date" id="fecha" name="fecha" required>
+            </div>
+            <div class="form-group">
+                <label for="monto">Monto solicitado ($)</label>
+                <input type="number" id="monto" name="monto" min="0" step="1" required placeholder="Monto en pesos">
+            </div>
+        </div>
 
-        <p>
-          <label for="rut">RUT:</label><br>
-          <input type="text" id="rut" name="rut">
-        </p>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="descuento">Descontar en liquidación del mes de</label>
+                <input type="text" id="descuento" name="descuento" placeholder="Ej: Mayo 2026">
+            </div>
+            <div class="form-group checkbox-group" style="margin-top: 25px;">
+                <input type="checkbox" id="autorizacion" name="autorizacion" required>
+                <label for="autorizacion" style="margin: 0;">Autorizo el descuento del anticipo en mi liquidación</label>
+            </div>
+        </div>
 
-        <p>
-          <label for="fecha">Fecha de solicitud:</label><br>
-          <input type="date" id="fecha" name="fecha">
-        </p>
+        <div class="form-group" style="margin-bottom: 20px;">
+            <label for="motivo">Motivo del anticipo</label>
+            <textarea id="motivo" name="motivo" rows="3" required placeholder="Detalle el motivo de la urgencia del anticipo..."></textarea>
+        </div>
 
-        <p>
-          <label for="monto">Monto solicitado:</label><br>
-          <input type="number" id="monto" name="monto" min="0" step="1">
-        </p>
-
-        <p>
-          <label for="motivo">Motivo del anticipo:</label><br>
-          <textarea id="motivo" name="motivo" rows="5" cols="50"></textarea>
-        </p>
-
-        <p>
-          <label for="descuento">Descartar en liquidacion del mes de:</label><br>
-          <input type="text" id="descuento" name="descuento">
-        </p>
-
-        <p>
-          <label>
-            <input type="checkbox" name="autorizacion"> Autorizo el descuento del anticipo en mi proxima liquidacion de sueldo.
-          </label>
-        </p>
-
-        <p>
-          <button type="submit">Guardar solicitud</button>
-          <button type="reset">Limpiar formulario</button>
-        </p>
+        <div class="botones">
+          <button type="submit" class="btn-primary" style="width: 48%;">Guardar solicitud</button>
+          <button type="reset" class="btn-secondary" style="width: 48%;">Limpiar formulario</button>
+        </div>
       </form>
+    </div>
 
-      <br><br>
-
-      <table width="100%">
-        <tr>
-          <td align="center">_______________________________</td>
-          <td align="center">_______________________________</td>
-        </tr>
-        <tr>
-          <td align="center">Firma trabajador</td>
-          <td align="center">Aprobacion jefatura / RR.HH.</td>
-        </tr>
-      </table>
-    </section>
-
-    <hr>
-    <section class="panel">
+    <!-- TABLA DE ANTICIPOS -->
+    <div class="panel">
       <h2>Anticipos Guardados</h2>
-      <table border="1" width="100%" cellpadding="8" cellspacing="0" id="tablaAnticipos">
-        <thead>
-          <tr>
-            <th align="left">Fecha</th>
-            <th align="left">Nombre</th>
-            <th align="left">RUT</th>
-            <th align="right">Monto</th>
-            <th align="left">Motivo</th>
-            <th align="left">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-        </tbody>
-      </table>
-      <p><small>Nota: Los datos se guardan en el navegador (localStorage). Si borras el cache, se pierden.</small></p>
-    </section>
-  </main><script>
+      <div class="table-wrap">
+          <table border="1" id="tablaAnticipos">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Nombre</th>
+                <th>RUT</th>
+                <th style="text-align: right;">Monto</th>
+                <th>Motivo</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+            </tbody>
+          </table>
+      </div>
+      <p style="margin-top: 10px;"><small>Nota: Los datos se guardan en el navegador (localStorage). Si borras el caché, se pierden.</small></p>
+    </div>
+  </main>
+
+  <script>
+    // Format money in Chilean Pesos format
+    function formatCLP(val) {
+        return new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(val);
+    }
+
+    // 1. GENERATE PAY SLIP LOGIC
+    function generatePaySlip() {
+        // Capture input values
+        const empresa = document.getElementById('genEmpresa').value.trim();
+        const empresaRut = document.getElementById('genEmpresaRut').value.trim();
+        const trabajador = document.getElementById('genTrabajador').value.trim();
+        const trabajadorRut = document.getElementById('genTrabajadorRut').value.trim();
+        const cargo = document.getElementById('genCargo').value.trim();
+        const costo = document.getElementById('genCosto').value.trim();
+        const periodo = document.getElementById('genPeriodo').value.trim();
+        const dias = parseInt(document.getElementById('genDias').value) || 0;
+
+        // Haberes
+        const sueldoBase = parseFloat(document.getElementById('genSueldoBase').value) || 0;
+        const gratificacion = parseFloat(document.getElementById('genGratificacion').value) || 0;
+        const horasExtra = parseFloat(document.getElementById('genHorasExtra').value) || 0;
+        const asistencia = parseFloat(document.getElementById('genBonoAsistencia').value) || 0;
+        const locomocion = parseFloat(document.getElementById('genBonoLocomocion').value) || 0;
+        const colacion = parseFloat(document.getElementById('genBonoColacion').value) || 0;
+
+        // Descuentos
+        const afp = parseFloat(document.getElementById('genAfp').value) || 0;
+        const salud = parseFloat(document.getElementById('genSalud').value) || 0;
+        const seguro = parseFloat(document.getElementById('genSeguroCesantia').value) || 0;
+        const impuesto = parseFloat(document.getElementById('genImpuestoUnico').value) || 0;
+        const anticipo = parseFloat(document.getElementById('genAnticipo').value) || 0;
+        const prestamo = parseFloat(document.getElementById('genPrestamo').value) || 0;
+
+        // Calculations
+        const totalHaberes = sueldoBase + gratificacion + horasExtra + asistencia + locomocion + colacion;
+        const totalImponible = sueldoBase + gratificacion + horasExtra + asistencia;
+        const totalNoImponible = locomocion + colacion;
+        const totalDescuentos = afp + salud + seguro + impuesto + anticipo + prestamo;
+        const liquidoPagar = totalHaberes - totalDescuentos;
+
+        // Rellenar etiquetas de texto de la liquidación oficial
+        document.getElementById('lblEmpresa').textContent = empresa;
+        document.getElementById('lblEmpresaRut').textContent = empresaRut;
+        document.getElementById('lblTrabajador').textContent = trabajador;
+        document.getElementById('lblTrabajadorRut').textContent = trabajadorRut;
+        document.querySelector('.sign-worker-rut').textContent = trabajadorRut;
+        document.getElementById('lblCargo').textContent = cargo;
+        document.getElementById('lblCosto').textContent = costo;
+        document.getElementById('lblPeriodo').textContent = periodo;
+        document.getElementById('lblDias').textContent = dias;
+
+        // Rellenar desglose de Haberes
+        document.getElementById('lblSueldoBase').textContent = formatCLP(sueldoBase);
+        document.getElementById('lblGratificacion').textContent = formatCLP(gratificacion);
+        document.getElementById('lblHorasExtra').textContent = formatCLP(horasExtra);
+        document.getElementById('lblBonoAsistencia').textContent = formatCLP(asistencia);
+        document.getElementById('lblBonoLocomocion').textContent = formatCLP(locomocion);
+        document.getElementById('lblBonoColacion').textContent = formatCLP(colacion);
+        document.getElementById('lblTotalHaberes').textContent = formatCLP(totalHaberes);
+
+        // Rellenar desglose de Descuentos
+        document.getElementById('lblAfp').textContent = formatCLP(afp);
+        document.getElementById('lblSalud').textContent = formatCLP(salud);
+        document.getElementById('lblSeguro').textContent = formatCLP(seguro);
+        document.getElementById('lblImpuesto').textContent = formatCLP(impuesto);
+        document.getElementById('lblAnticipo').textContent = formatCLP(anticipo);
+        document.getElementById('lblPrestamo').textContent = formatCLP(prestamo);
+        document.getElementById('lblTotalDescuentos').textContent = formatCLP(totalDescuentos);
+
+        // Rellenar Resumen de totales
+        document.getElementById('lblTotalImponible').textContent = formatCLP(totalImponible);
+        document.getElementById('lblTotalNoImponible').textContent = formatCLP(totalNoImponible);
+        document.getElementById('lblDescuentosResumen').textContent = formatCLP(totalDescuentos);
+        document.getElementById('lblLiquidoPagar').textContent = formatCLP(liquidoPagar);
+
+        // Save state to localStorage
+        const payrollState = {
+            empresa, empresaRut, trabajador, trabajadorRut, cargo, costo, periodo, dias,
+            sueldoBase, gratificacion, horasExtra, asistencia, locomocion, colacion,
+            afp, salud, seguro, impuesto, anticipo, prestamo
+        };
+        localStorage.setItem('ultimaLiquidacion', JSON.stringify(payrollState));
+    }
+
+    // 2. LOAD STORED PAYROLL STATE ON MOUNT
+    function loadPayrollState() {
+        const stored = localStorage.getItem('ultimaLiquidacion');
+        if (stored) {
+            try {
+                const p = JSON.parse(stored);
+                document.getElementById('genEmpresa').value = p.empresa || "Seguridad LTDA";
+                document.getElementById('genEmpresaRut').value = p.empresaRut || "76.998.432-K";
+                document.getElementById('genTrabajador').value = p.trabajador || "Ana Morales";
+                document.getElementById('genTrabajadorRut').value = p.trabajadorRut || "18.456.789-0";
+                document.getElementById('genCargo').value = p.cargo || "Guardia Especialista";
+                document.getElementById('genCosto').value = p.costo || "Zona Centro";
+                document.getElementById('genPeriodo').value = p.periodo || "Mayo 2026";
+                document.getElementById('genDias').value = p.dias ?? 30;
+
+                document.getElementById('genSueldoBase').value = p.sueldoBase ?? 680000;
+                document.getElementById('genGratificacion').value = p.gratificacion ?? 125000;
+                document.getElementById('genHorasExtra').value = p.horasExtra ?? 48000;
+                document.getElementById('genBonoAsistencia').value = p.asistencia ?? 30000;
+                document.getElementById('genBonoLocomocion').value = p.locomocion ?? 45000;
+                document.getElementById('genBonoColacion').value = p.colacion ?? 45000;
+
+                document.getElementById('genAfp').value = p.afp ?? 78200;
+                document.getElementById('genSalud').value = p.salud ?? 47600;
+                document.getElementById('genSeguroCesantia').value = p.seguro ?? 4500;
+                document.getElementById('genImpuestoUnico').value = p.impuesto ?? 0;
+                document.getElementById('genAnticipo').value = p.anticipo ?? 50000;
+                document.getElementById('genPrestamo').value = p.prestamo ?? 0;
+            } catch (e) {}
+        }
+        // Run first generation automatically to render defaults
+        generatePaySlip();
+    }
+
+    // 3. PRINT PRINTABLE PAGE LOGIC
+    function imprimirLiquidacion() {
+        window.print();
+    }
+
+    // ----------------------------------------------------
+    // ANTICIPOS SYSTEM LOGIC (ORIGINAL FUNCTIONALITY)
+    // ----------------------------------------------------
     document.addEventListener('DOMContentLoaded', function() {
       cargarAnticipos();
+      loadPayrollState();
     });
 
     document.getElementById('formAnticipo').addEventListener('submit', function(e) {
@@ -234,7 +484,7 @@
       var monto = document.getElementById('monto').value;
       var motivo = document.getElementById('motivo').value.trim();
       var descuento = document.getElementById('descuento').value.trim();
-      var autorizacion = document.querySelector('input[name="autorizacion"]').checked;
+      var autorizacion = document.getElementById('autorizacion').checked;
 
       if (!nombre || !rut || !fecha || !monto || !motivo) {
         alert('Por favor completa todos los campos obligatorios.');
@@ -254,6 +504,14 @@
 
       guardarAnticipo(anticipo);
       alert('Solicitud de anticipo guardada correctamente.');
+      
+      // Auto populate the Pay Slip generator's anticipo field if it matches the current worker!
+      const activeWorker = document.getElementById('genTrabajador').value.trim().toLowerCase();
+      if (nombre.toLowerCase() === activeWorker || activeWorker.includes(nombre.toLowerCase())) {
+          document.getElementById('genAnticipo').value = monto;
+          generatePaySlip();
+      }
+
       document.getElementById('formAnticipo').reset();
       cargarAnticipos();
     });
@@ -282,7 +540,7 @@
           '<td>' + a.rut + '</td>' +
           '<td align="right">$ ' + parseInt(a.monto).toLocaleString('es-CL') + '</td>' +
           '<td>' + a.motivo + '</td>' +
-          '<td><button type="button" onclick="eliminarAnticipo(' + a.id + ')">Eliminar</button></td>';
+          '<td><button class="btn btn-danger" style="min-height:30px; padding: 0.2rem 0.6rem; font-size:12px;" type="button" onclick="eliminarAnticipo(' + a.id + ')">Eliminar</button></td>';
         tbody.appendChild(tr);
       });
     }

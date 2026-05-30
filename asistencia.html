@@ -34,9 +34,7 @@
             <a href="liquidaciones.html" class="nav-link">Liquidaciones</a>
             <a href="vacaciones.html" class="nav-link">Vacaciones</a>
         </nav>
-        <div class="header-actions">
-            <button class="icon-btn" id="themeToggle" aria-label="Cambiar tema">🌙</button>
-        </div>
+
     </header>
 
     <section class="grid">
@@ -418,46 +416,6 @@
     
     
 
-    
-    // ---------- LOCAL THEME TOGGLE ----------
-    const THEME_KEY = 'asistencia-theme-v1';
-    const themeToggle = document.getElementById('themeToggle');
-
-    function saveTheme(theme) {
-      try {
-        localStorage.setItem(THEME_KEY, theme);
-      } catch (error) {}
-    }
-
-    function loadTheme() {
-      try {
-        return localStorage.getItem(THEME_KEY);
-      } catch (error) {
-        return null;
-      }
-    }
-
-    function setTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      saveTheme(theme);
-      if (themeToggle) {
-        themeToggle.innerHTML = theme === 'dark'
-          ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"></path></svg>'
-          : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
-        themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
-      }
-    }
-
-    if (themeToggle) {
-      themeToggle.addEventListener('click', () => {
-        const nextTheme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        setTheme(nextTheme);
-      });
-    }
-
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
-    const savedTheme = loadTheme();
-    setTheme(savedTheme || (systemDark.matches ? 'dark' : 'light'));
     
     render();
     
