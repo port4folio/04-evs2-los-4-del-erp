@@ -4,10 +4,39 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control de Bodegas</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <script>
+      try {
+        const theme = localStorage.getItem('asistencia-theme-v1') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    </script>
+
 </head>
 <body>
+    <header class="app-header">
+        <div class="brand">
+            <div class="logo" aria-hidden="true">🛡️</div>
+            <div class="brand-text">
+                <h1>Seguridad LTDA</h1>
+                <p>Sistema ERP Integrado</p>
+            </div>
+        </div>
+        <nav class="app-nav">
+            <a href="asistencia.html" class="nav-link">Asistencia</a>
+            <a href="bodegas.html" class="nav-link active">Bodegas</a>
+            <a href="catalogo.html" class="nav-link">Catálogo</a>
+            <a href="ficha-personal.html" class="nav-link">Ficha Personal</a>
+            <a href="ficha-producto.html" class="nav-link">Ficha Producto</a>
+            <a href="liquidaciones.html" class="nav-link">Liquidaciones</a>
+            <a href="vacaciones.html" class="nav-link">Vacaciones</a>
+        </nav>
+    </header>
 
-  <div>
+    <main class="app">
+        <div class="panel">
+            <div>
     <h1>Control de Bodegas</h1>
 
     <table border="1" id="tablaBodegas">
@@ -79,8 +108,9 @@
       </div>
     </div>
   </div>
-
-  <script>
+        </div>
+    </main>
+    <script>
     const datosIniciales = [
       {
         id: 1,

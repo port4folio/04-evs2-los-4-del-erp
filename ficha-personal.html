@@ -4,115 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ficha del Personal - Seguridad LTDA</title>
-    <style>
-        :root {
-            --primary-color: #0f172a;
-            --secondary-color: #3b82f6;
-            --bg-color: #f8fafc;
-            --border-color: #e2e8f0;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--primary-color);
-            margin: 0;
-            padding: 2rem;
-            display: flex;
-            justify-content: center;
-        }
+    <link rel="stylesheet" href="styles.css">
 
-        .form-container {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 800px;
-        }
+    <script>
+      try {
+        const theme = localStorage.getItem('asistencia-theme-v1') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    </script>
 
-        h2 {
-            margin-top: 0;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0.5rem;
-            color: var(--primary-color);
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        label {
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="file"],
-        select {
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-        }
-
-        .checkbox-group {
-            flex-direction: row;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .checkbox-group input {
-            width: 1.2rem;
-            height: 1.2rem;
-        }
-
-        .btn-submit {
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            transition: background-color 0.3s;
-        }
-
-        .btn-submit:hover {
-            background-color: #2563eb;
-        }
-
-        .section-title {
-            grid-column: 1 / -1;
-            background-color: var(--bg-color);
-            padding: 0.5rem;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            margin-bottom: -0.5rem;
-        }
-    </style>
 </head>
 <body>
+    <header class="app-header">
+        <div class="brand">
+            <div class="logo" aria-hidden="true">🛡️</div>
+            <div class="brand-text">
+                <h1>Seguridad LTDA</h1>
+                <p>Sistema ERP Integrado</p>
+            </div>
+        </div>
+        <nav class="app-nav">
+            <a href="asistencia.html" class="nav-link">Asistencia</a>
+            <a href="bodegas.html" class="nav-link">Bodegas</a>
+            <a href="catalogo.html" class="nav-link">Catálogo</a>
+            <a href="ficha-personal.html" class="nav-link active">Ficha Personal</a>
+            <a href="ficha-producto.html" class="nav-link">Ficha Producto</a>
+            <a href="liquidaciones.html" class="nav-link">Liquidaciones</a>
+            <a href="vacaciones.html" class="nav-link">Vacaciones</a>
+        </nav>
+    </header>
 
-    <div class="form-container">
+    <main class="app">
+        <div class="form-container">
         <h2>Ficha Completa del Personal</h2>
         <form action="#" method="POST" onsubmit="event.preventDefault(); alert('Ficha guardada exitosamente.');">
             
@@ -173,6 +96,6 @@
             <button type="submit" class="btn-submit">Guardar Ficha de los empleados</button>
         </form>
     </div>
-
+    </main>
 </body>
 </html>

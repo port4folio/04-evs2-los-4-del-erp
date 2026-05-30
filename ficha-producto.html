@@ -3,126 +3,357 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ficha de Producto</title>
-
-    <style>
-        body{
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .contenedor{
-            max-width: 700px;
-            background: white;
-            padding: 25px;
-            margin: auto;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-        }
-
-        h1{
-            text-align: center;
-            color: #333;
-        }
-
-        form{
-            display: flex;
-            flex-direction: column;
-        }
-
-        label{
-            margin-top: 15px;
-            font-weight: bold;
-        }
-
-        input, textarea, select{
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        textarea{
-            resize: vertical;
-        }
-
-        .botones{
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        button{
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            color: white;
-            font-size: 16px;
-        }
-
-        .guardar{
-            background-color: #28a745;
-        }
-
-        .limpiar{
-            background-color: #dc3545;
-        }
-
-        button:hover{
-            opacity: 0.9;
-        }
-    </style>
+    <title>Ficha de Producto en Tiempo Real</title>
+    <link rel="stylesheet" href="styles.css">
+    
+    <script>
+      try {
+        const theme = localStorage.getItem('asistencia-theme-v1') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {}
+    </script>
 </head>
 <body>
 
-    <div class="contenedor">
-        <h1>Ficha de Producto</h1>
-
-        <form action="#" method="post" enctype="multipart/form-data">
-
-            <label for="codigo">Código Alfanumérico</label>
-            <input type="text" id="codigo" name="codigo"
-                   placeholder="Ej: PRD-A123" required>
-
-            <label for="nombre">Nombre del Producto</label>
-            <input type="text" id="nombre" name="nombre"
-                   placeholder="Ingrese nombre del producto" required>
-
-            <label for="descripcion">Descripción</label>
-            <textarea id="descripcion" name="descripcion"
-                      rows="4" placeholder="Descripción del producto"></textarea>
-
-            <label for="foto">Fotografía del Producto</label>
-            <input type="file" id="foto" name="foto"
-                   accept="image/*">
-
-            <label for="ficha">Ficha Técnica</label>
-            <input type="file" id="ficha" name="ficha"
-                   accept=".pdf,.doc,.docx">
-
-            <label for="ubicacion">Ubicación en Bodega</label>
-            <select id="ubicacion" name="ubicacion">
-                <option value="">Seleccione ubicación</option>
-                <option value="A1">Pasillo A - Estante 1</option>
-                <option value="A2">Pasillo A - Estante 2</option>
-                <option value="B1">Pasillo B - Estante 1</option>
-                <option value="B2">Pasillo B - Estante 2</option>
-            </select>
-
-            <label for="stock">Cantidad en Stock</label>
-            <input type="number" id="stock" name="stock"
-                   min="0" placeholder="Ingrese cantidad">
-
-            <div class="botones">
-                <button type="submit" class="guardar">Guardar</button>
-                <button type="reset" class="limpiar">Limpiar</button>
+    <header class="app-header">
+        <div class="brand">
+            <div class="logo" aria-hidden="true">🛡️</div>
+            <div class="brand-text">
+                <h1>Seguridad LTDA</h1>
+                <p>Sistema ERP Integrado</p>
             </div>
+        </div>
+        <nav class="app-nav">
+            <a href="asistencia.html" class="nav-link">Asistencia</a>
+            <a href="bodegas.html" class="nav-link">Bodegas</a>
+            <a href="catalogo.html" class="nav-link">Catálogo</a>
+            <a href="ficha-personal.html" class="nav-link">Ficha Personal</a>
+            <a href="ficha-producto.html" class="nav-link active">Ficha Producto</a>
+            <a href="liquidaciones.html" class="nav-link">Liquidaciones</a>
+            <a href="vacaciones.html" class="nav-link">Vacaciones</a>
+        </nav>
+    </header>
 
-        </form>
-    </div>
+    <main class="app">
+        <!-- Ficha de Detalle Dinámica -->
+        <div class="panel">
+            <h1 style="border-bottom: 2px solid var(--color-border); padding-bottom: 10px;">Detalle de Producto en Tiempo Real</h1>
+            
+            <div class="product-detail-grid">
+                <!-- Columna Izquierda: Imagen del Producto y Meta -->
+                <div class="product-media-card">
+                    <img id="liveProductImg" src="https://via.placeholder.com/300x220" alt="Fotografía del Producto">
+                    <div class="panel" style="background-color: var(--color-surface-offset); margin-top: 15px; padding: 15px;">
+                        <p style="margin: 5px 0;"><strong>Código Alfanumérico:</strong> <span id="liveProductCode">PRD-A123</span></p>
+                        <p style="margin: 5px 0;"><strong>Ubicación en Bodega:</strong> <span id="liveProductLocation">Pasillo A - Estante 1</span></p>
+                    </div>
+                </div>
+                
+                <!-- Columna Derecha: Dashboard de Stock en Tiempo Real -->
+                <div class="product-info-block">
+                    <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <h2 id="liveProductName" class="product-title" style="margin: 0;">Cargando Producto...</h2>
+                        <span id="liveStockBadge" class="stock-badge disponible">Consultando Stock</span>
+                    </div>
+                    
+                    <p id="liveProductMeta" class="product-meta">ID de Producto: #101 · Ubicación: Bodega General</p>
+                    <p id="liveProductDesc" class="product-desc">Descripción técnica del producto de seguridad de alto rendimiento.</p>
+                    
+                    <hr>
+                    
+                    <!-- Dashboard de Stocks por Bodega -->
+                    <h3 style="margin-bottom: 15px;">Dashboard de Inventario</h3>
+                    <div class="warehouse-dashboard">
+                        <div class="warehouse-card">
+                            <span>Bodega Norte</span>
+                            <strong id="stockNorte">0</strong>
+                        </div>
+                        <div class="warehouse-card">
+                            <span>Bodega Sur</span>
+                            <strong id="stockSur">0</strong>
+                        </div>
+                        <div class="warehouse-card">
+                            <span>Bodega Central</span>
+                            <strong id="stockCentral">0</strong>
+                        </div>
+                        <div class="warehouse-card total-stock">
+                            <span>Stock Total</span>
+                            <strong id="stockTotal">0</strong>
+                        </div>
+                    </div>
+                    
+                    <!-- Tabla del detalle -->
+                    <h3>Movimiento Acumulado</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Ubicación</th>
+                                <th style="text-align: right;">Entradas</th>
+                                <th style="text-align: right;">Salidas</th>
+                                <th style="text-align: right;">Stock Actual</th>
+                            </tr>
+                        </thead>
+                        <tbody id="liveStockTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center;">Buscando registros de movimiento...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Botón Colapsable para Editar Detalles (Formulario Original) -->
+            <button class="collapsible-trigger" id="toggleEditForm">
+                <span>Editar Detalles del Producto / Registrar de Cero</span>
+                <span id="triggerArrow">▼</span>
+            </button>
+            
+            <div class="collapsible-content" id="editFormContent">
+                <form action="#" method="post" enctype="multipart/form-data" onsubmit="event.preventDefault(); alert('Cambios guardados exitosamente en la base de datos de Seguridad LTDA.');">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="codigo">Código Alfanumérico</label>
+                            <input type="text" id="codigo" name="codigo" placeholder="Ej: PRD-A123" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nombre">Nombre del Producto</label>
+                            <input type="text" id="nombre" name="nombre" placeholder="Ingrese nombre del producto" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="foto">Fotografía del Producto</label>
+                            <input type="file" id="foto" name="foto" accept="image/*">
+                        </div>
+                        <div class="form-group">
+                            <label for="ficha">Ficha Técnica</label>
+                            <input type="file" id="ficha" name="ficha" accept=".pdf,.doc,.docx">
+                        </div>
+                        <div class="form-group">
+                            <label for="ubicacion">Ubicación en Bodega</label>
+                            <select id="ubicacion" name="ubicacion">
+                                <option value="">Seleccione ubicación</option>
+                                <option value="A1">Pasillo A - Estante 1</option>
+                                <option value="A2">Pasillo A - Estante 2</option>
+                                <option value="B1">Pasillo B - Estante 1</option>
+                                <option value="B2">Pasillo B - Estante 2</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="stock">Cantidad en Stock</label>
+                            <input type="number" id="stock" name="stock" min="0" placeholder="Ingrese cantidad">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descripcion">Descripción</label>
+                        <textarea id="descripcion" name="descripcion" rows="3" placeholder="Descripción del producto"></textarea>
+                    </div>
 
+                    <div class="botones">
+                        <button type="submit" class="guardar">Guardar</button>
+                        <button type="reset" class="limpiar">Limpiar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Datos de respaldo predeterminados por si no hay registros en localStorage
+        const defaultData = [
+          {
+            id: 1,
+            nombre: "Bodega Norte",
+            productos: [
+              { idProd: 101, nombre: "Notebook Gamer", stock: 100, entradasAcum: 150, salidasAcum: 50 },
+              { idProd: 102, nombre: "Mouse Inalámbrico", stock: 200, entradasAcum: 250, salidasAcum: 50 },
+              { idProd: 103, nombre: "Teclado Mecánico", stock: 300, entradasAcum: 350, salidasAcum: 50 }
+            ]
+          },
+          {
+            id: 2,
+            nombre: "Bodega Sur",
+            productos: [
+              { idProd: 101, nombre: "Notebook Gamer", stock: 50, entradasAcum: 80, salidasAcum: 30 },
+              { idProd: 102, nombre: "Mouse Inalámbrico", stock: 75, entradasAcum: 100, salidasAcum: 25 },
+              { idProd: 103, nombre: "Teclado Mecánico", stock: 120, entradasAcum: 150, salidasAcum: 30 }
+            ]
+          },
+          {
+            id: 3,
+            nombre: "Bodega Central",
+            productos: [
+              { idProd: 101, nombre: "Notebook Gamer", stock: 200, entradasAcum: 300, salidasAcum: 100 },
+              { idProd: 102, nombre: "Mouse Inalámbrico", stock: 150, entradasAcum: 200, salidasAcum: 50 },
+              { idProd: 103, nombre: "Teclado Mecánico", stock: 80, entradasAcum: 120, salidasAcum: 40 }
+            ]
+          }
+        ];
+
+        // Mapeo estático de imágenes y meta descriptivos para los productos
+        const productExtraDetails = {
+            101: {
+                img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=400&q=80",
+                desc: "Notebook Gamer de alto rendimiento de Seguridad LTDA. Equipado con un procesador de última generación y sistema gráfico dedicado, ideal para análisis forense, monitoreo de cámaras IP y simulaciones de vulnerabilidades en tiempo real.",
+                code: "PRD-N101",
+                loc: "Pasillo A - Estante 1",
+                origName: "Notebook Gamer"
+            },
+            102: {
+                img: "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?auto=format&fit=crop&w=400&q=80",
+                desc: "Mouse Inalámbrico ergonómico con conexión Bluetooth dual y sensor óptico de alta precisión (DPI ajustable). Diseñado para operadores de centrales de monitoreo que requieren uso continuo sin fatiga física.",
+                code: "PRD-M102",
+                loc: "Pasillo B - Estante 2",
+                origName: "Mouse Inalámbrico"
+            },
+            103: {
+                img: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=400&q=80",
+                desc: "Teclado Mecánico RGB premium con interruptores táctiles silenciosos. Diseñado específicamente para optimizar la velocidad de respuesta y escritura en entornos críticos de ciberseguridad y auditoría digital.",
+                code: "PRD-T103",
+                loc: "Pasillo B - Estante 4",
+                origName: "Teclado Mecánico"
+            }
+        };
+
+        // 1. CARGAR DATOS EN TIEMPO REAL DESDE LOCALSTORAGE
+        function getWarehouseData() {
+            const stored = localStorage.getItem('bodegasControl');
+            if (stored) {
+                try {
+                    return JSON.parse(stored);
+                } catch(e) {}
+            }
+            return defaultData;
+        }
+
+        // 2. EXTRAER EL ID DEL PRODUCTO DESDE LA URL
+        function getProductIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const prodId = parseInt(params.get('prod'));
+            // Validar que el ID sea uno de los conocidos, sino por defecto el 101 (Notebook Gamer)
+            return [101, 102, 103].includes(prodId) ? prodId : 101;
+        }
+
+        // 3. RENDERIZAR DETALLES
+        function loadLiveInventory() {
+            const prodId = getProductIdFromUrl();
+            const bodegas = getWarehouseData();
+            const details = productExtraDetails[prodId];
+            
+            // Buscar existencias en cada bodega
+            let stockN = 0;
+            let stockS = 0;
+            let stockC = 0;
+            let entrancesN = 0, exitsN = 0;
+            let entrancesS = 0, exitsS = 0;
+            let entrancesC = 0, exitsC = 0;
+            let productName = details.origName;
+
+            bodegas.forEach(b => {
+                const prod = b.productos.find(p => p.idProd === prodId);
+                if (prod) {
+                    productName = prod.nombre; // Si se editó el nombre en CRUD, cargarlo!
+                    if (b.nombre.includes("Norte")) {
+                        stockN = prod.stock;
+                        entrancesN = prod.entradasAcum || 0;
+                        exitsN = prod.salidasAcum || 0;
+                    } else if (b.nombre.includes("Sur")) {
+                        stockS = prod.stock;
+                        entrancesS = prod.entradasAcum || 0;
+                        exitsS = prod.salidasAcum || 0;
+                    } else if (b.nombre.includes("Central")) {
+                        stockC = prod.stock;
+                        entrancesC = prod.entradasAcum || 0;
+                        exitsC = prod.salidasAcum || 0;
+                    }
+                }
+            });
+
+            const stockT = stockN + stockS + stockC;
+
+            // Rellenar información en la interfaz
+            document.getElementById('liveProductName').textContent = productName;
+            document.getElementById('liveProductImg').src = details.img;
+            document.getElementById('liveProductCode').textContent = details.code;
+            document.getElementById('liveProductLocation').textContent = details.loc;
+            document.getElementById('liveProductDesc').textContent = details.desc;
+            document.getElementById('liveProductMeta').textContent = `ID de Producto: #${prodId} · Categoría: Equipamiento Crítico de Seguridad`;
+
+            // Rellenar contadores del dashboard
+            document.getElementById('stockNorte').textContent = stockN;
+            document.getElementById('stockSur').textContent = stockS;
+            document.getElementById('stockCentral').textContent = stockC;
+            document.getElementById('stockTotal').textContent = stockT;
+
+            // Configurar Badge de disponibilidad
+            const badge = document.getElementById('liveStockBadge');
+            badge.className = 'stock-badge'; // Reset classes
+            
+            if (stockT > 250) {
+                badge.classList.add('disponible');
+                badge.textContent = 'Stock Excelente';
+            } else if (stockT > 0 && stockT <= 250) {
+                badge.classList.add('bajo');
+                badge.textContent = 'Bajo Stock';
+            } else {
+                badge.classList.add('agotado');
+                badge.textContent = 'Agotado';
+            }
+
+            // Rellenar Tabla
+            const tbody = document.getElementById('liveStockTableBody');
+            tbody.innerHTML = `
+                <tr>
+                    <td><strong>Bodega Norte</strong></td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums;">${entrancesN}</td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums;">${exitsN}</td>
+                    <td style="text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; color: var(--color-primary);">${stockN}</td>
+                </tr>
+                <tr>
+                    <td><strong>Bodega Sur</strong></td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums;">${entrancesS}</td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums;">${exitsS}</td>
+                    <td style="text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; color: var(--color-primary);">${stockS}</td>
+                </tr>
+                <tr>
+                    <td><strong>Bodega Central</strong></td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums;">${entrancesC}</td>
+                    <td style="text-align: right; font-variant-numeric: tabular-nums; color: var(--color-danger);">${exitsC}</td>
+                    <td style="text-align: right; font-weight: bold; font-variant-numeric: tabular-nums; color: var(--color-primary);">${stockC}</td>
+                </tr>
+                <tr style="background-color: var(--color-surface-offset);">
+                    <td><strong>Inventario Total</strong></td>
+                    <td style="text-align: right; font-weight: bold; font-variant-numeric: tabular-nums;">${entrancesN + entrancesS + entrancesC}</td>
+                    <td style="text-align: right; font-weight: bold; font-variant-numeric: tabular-nums;">${exitsN + exitsS + exitsC}</td>
+                    <td style="text-align: right; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--color-success); font-size: 1.1rem;">${stockT}</td>
+                </tr>
+            `;
+
+            // Rellenar el formulario con los valores por defecto del producto
+            document.getElementById('nombre').value = productName;
+            document.getElementById('codigo').value = details.code;
+            document.getElementById('stock').value = stockT;
+            document.getElementById('descripcion').value = details.desc;
+            document.getElementById('ubicacion').value = prodId === 101 ? 'A1' : (prodId === 102 ? 'B2' : 'B1');
+        }
+
+        // 4. INTERACTIVIDAD COLLAPSIBLE
+        const toggleBtn = document.getElementById('toggleEditForm');
+        const content = document.getElementById('editFormContent');
+        const arrow = document.getElementById('triggerArrow');
+
+        toggleBtn.addEventListener('click', () => {
+            const isExpanded = content.classList.contains('expanded');
+            if (isExpanded) {
+                content.classList.remove('expanded');
+                arrow.textContent = '▼';
+            } else {
+                content.classList.add('expanded');
+                arrow.textContent = '▲';
+            }
+        });
+
+        // Cargar todo
+        loadLiveInventory();
+    </script>
 </body>
 </html>
