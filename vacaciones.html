@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitud de Vacaciones - Portal del Empleado</title>
+    <!-- Sin CSS, diseño por defecto del navegador -->
+</head>
+<body>
+
+<h1>Solicitud de Vacaciones - Portal del Empleado</h1>
+
+<!-- Datos del empleado -->
+<p><strong>Empleado:</strong> EmpleadoEjemplo | <strong>ID:</strong> RRHH-1042 | <strong>Departamento:</strong> Operaciones</p>
+<hr>
+
+<!-- Resumen de vacaciones -->
+<h2>Resumen de Vacaciones</h2>
+<table border="1">
+    <thead>
+        <tr><th>Concepto</th><th>Días</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Días totales anuales</td><td id="totalDays">20</td></tr>
+        <tr><td>Días ya aprobados / tomados</td><td id="approvedDays">0</td></tr>
+        <tr><td>Días en solicitudes pendientes</td><td id="pendingDays">0</td></tr>
+        <tr><td><strong>Días disponibles para nueva solicitud</strong></td><td id="availableDays"><strong>0</strong></td></tr>
+    </tbody>
+</table>
+<br>
+
+<!-- Formulario de nueva solicitud con campos de tipo date (calendario nativo) -->
+<h2>Nueva Solicitud de Vacaciones</h2>
+<form id="vacationForm">
+    <label>Fecha de inicio:</label>
+    <input type="date" id="startDate" required><br><br>
+
+    <label>Fecha de término:</label>
+    <input type="date" id="endDate" required><br><br>
+
+    <label>Días hábiles calculados:</label>
+    <input type="text" id="calculatedDays" readonly value="0"><br><br>
+
+    <label>Motivo (opcional):</label><br>
+    <textarea id="reason" rows="2" cols="40"></textarea><br><br>
+
+    <button type="submit">Enviar solicitud</button>
+</form>
+
+<div id="formFeedback"></div>
+
+<!-- Solicitudes Pendientes (solo botones Aprobar/Rechazar) -->
+<h2>Solicitudes Pendientes (por aprobar)</h2>
+<table border="1" id="pendingTable">
+    <thead>
+        <tr><th>Desde</th><th>Hasta</th><th>Días</th><th>Motivo</th><th>Acciones</th></tr>
+    </thead>
+    <tbody id="pendingTableBody">
+        <tr><td colspan="5">No hay solicitudes pendientes</td></tr>
+    </tbody>
+</table>
+
+<!-- Vacaciones Aprobadas -->
+<h2>Vacaciones Aprobadas / Historial</h2>
+<table border="1" id="approvedTable">
+    <thead>
+        <tr><th>Desde</th><th>Hasta</th><th>Días</th><th>Motivo</th><th>Estado</th></tr>
+    </thead>
+    <tbody id="approvedTableBody">
+        <tr><td colspan="5">No hay registros aprobados</td></tr>
+    </tbody>
+</table>
+
+<script>
+    // ---------- DATOS INICIALES ----------
+    const TOTAL_DAYS = 20;
+
+    // Vacaciones aprobadas (historial) - fechas en formato YYYY-MM-DD
+    let approvedVacations = [
+        { id: "app1", start: "2025-01-10", end: "2025-01-14", daysCount: 3, reason: "Vacaciones verano" },
+        { id: "app2", start: "2025-02-17", end: "2025-02-19", daysCount: 2, reason: "Trámites personales" }
+    ];
+
+    let pendingRequests = [];
+
+    // ---------- FUNCIONES DE FECHAS ----------
+    // Formatear fecha YYYY-MM-DD a dd/mm/aaaa para mostrar en pantalla
+    function formatDateToDMY(dateStr) {
+        if (!dateStr) return '';
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
+    }
+
+    // Calcular días hábiles (lunes a viernes) entre dos fechas YYYY-MM-DD
+    function countBusinessDays(startYMD, endYMD) {
+        const start = new Date(startYMD);
+        const end = new Date(endYMD);
+        if (isNaN(start) || isNaN(end) || start > end) return 0;
+        let current = new Date(start);
+        let businessDays = 0;
+        while (current <= end) {
+            const day = current.getDay();
+            if (day !== 0 && day !== 6) businessDays++;
+            current.setDate(current.getDate() + 1);
+        }
+        return businessDays;
+    }
+
+    // Totales
+    function getTotalApprovedDays() {
+        return approvedVacations.reduce((sum, v) => sum + v.daysCount, 0);
+    }
+
+    function getTotalPendingDays() {
+        return pendingRequests.reduce((sum, v) => sum + v.daysCount, 0);
+    }
+
+    function getAvailableDays() {
+        return TOTAL_DAYS - (getTotalApprovedDays() + getTotalPendingDays());
+    }
+
+    // Verificar solapamiento de fechas
+    function hasDateOverlap(startYMD, endYMD, excludeRequestId = null) {
+        const allRequests = [...approvedVacations, ...pendingRequests];
+        const newStart = new Date(startYMD);
+        const newEnd = new Date(endYMD);
+        for (let req of allRequests) {
+            if (excludeRequestId && req.id === excludeRequestId) continue;
+            const reqStart = new Date(req.start);
+            const reqEnd = new Date(req.end);
+            if (newStart <= reqEnd && newEnd >= reqStart) return true;
+        }
+        return false;
+    }
+
+    // Actualizar toda la interfaz
+    function updateUI() {
+        document.getElementById('approvedDays').innerText = getTotalApprovedDays();
+        document.getElementById('pendingDays').innerText = getTotalPendingDays();
+        const available = getAvailableDays();
+        document.getElementById('availableDays').innerHTML = available >= 0 ? available : 0;
+        
+        const feedbackDiv = document.getElementById('formFeedback');
+        if (available < 0) {
+            feedbackDiv.innerHTML = "<strong>⚠️ Atención:</strong> Has excedido tus días totales.";
+        } else if (available === 0) {
+            feedbackDiv.innerHTML = "<strong>ℹ️ Información:</strong> No te quedan días disponibles para nuevas solicitudes.";
+        } else {
+            feedbackDiv.innerHTML = "";
+        }
+
+        // Tabla de solicitudes pendientes
+        const pendingBody = document.getElementById('pendingTableBody');
+        if (pendingRequests.length === 0) {
+            pendingBody.innerHTML = '<tr><td colspan="5">No hay solicitudes pendientes</td></tr>';
+        } else {
+            pendingBody.innerHTML = '';
+            for (let req of pendingRequests) {
+                const row = pendingBody.insertRow();
+                row.insertCell(0).innerText = formatDateToDMY(req.start);
+                row.insertCell(1).innerText = formatDateToDMY(req.end);
+                row.insertCell(2).innerText = req.daysCount;
+                row.insertCell(3).innerText = req.reason.substring(0, 40);
+                const actionsCell = row.insertCell(4);
+                
+                const approveBtn = document.createElement('button');
+                approveBtn.textContent = 'Aprobar';
+                approveBtn.style.marginRight = '5px';
+                approveBtn.onclick = (function(id, start, end, days, reason) {
+                    return function() { approveRequest(id, start, end, days, reason); };
+                })(req.id, req.start, req.end, req.daysCount, req.reason);
+                actionsCell.appendChild(approveBtn);
+                
+                const rejectBtn = document.createElement('button');
+                rejectBtn.textContent = 'Rechazar';
+                rejectBtn.onclick = (function(id) {
+                    return function() { rejectRequest(id); };
+                })(req.id);
+                actionsCell.appendChild(rejectBtn);
+            }
+        }
+
+        // Tabla de vacaciones aprobadas
+        const approvedBody = document.getElementById('approvedTableBody');
+        if (approvedVacations.length === 0) {
+            approvedBody.innerHTML = '<tr><td colspan="5">No hay registros aprobados</td></tr>';
+        } else {
+            approvedBody.innerHTML = '';
+            for (let app of approvedVacations) {
+                const row = approvedBody.insertRow();
+                row.insertCell(0).innerText = formatDateToDMY(app.start);
+                row.insertCell(1).innerText = formatDateToDMY(app.end);
+                row.insertCell(2).innerText = app.daysCount;
+                row.insertCell(3).innerText = app.reason;
+                row.insertCell(4).innerText = 'Aprobado';
+            }
+        }
+        saveToLocalStorage();
+    }
+
+    // Persistencia en localStorage
+    function saveToLocalStorage() {
+        localStorage.setItem("vacaciones_empleado", JSON.stringify({ approvedVacations, pendingRequests }));
+    }
+
+    function loadFromLocalStorage() {
+        const data = localStorage.getItem("vacaciones_empleado");
+        if (data) {
+            try {
+                const parsed = JSON.parse(data);
+                if (parsed.approvedVacations) approvedVacations = parsed.approvedVacations;
+                if (parsed.pendingRequests) pendingRequests = parsed.pendingRequests;
+            } catch(e) {}
+        }
+        updateUI();
+    }
+
+    // Agregar una nueva solicitud pendiente
+    function addVacationRequest(startYMD, endYMD, reason, daysCount) {
+        const available = getAvailableDays();
+        if (daysCount <= 0) throw new Error("Debe seleccionar un rango con al menos 1 día hábil.");
+        if (daysCount > available) throw new Error(`Solo te quedan ${available} días disponibles.`);
+        if (hasDateOverlap(startYMD, endYMD)) throw new Error("Las fechas se solapan con otra solicitud existente.");
+        
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const startDate = new Date(startYMD);
+        if (startDate < today) throw new Error("No puedes solicitar vacaciones con fechas pasadas.");
+        
+        const newId = "pend_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+        pendingRequests.push({
+            id: newId,
+            start: startYMD,
+            end: endYMD,
+            daysCount: daysCount,
+            reason: reason.trim() || "Sin motivo especificado",
+            status: "Pendiente"
+        });
+        updateUI();
+        return true;
+    }
+
+    // Aprobar solicitud
+    function approveRequest(id, startYMD, endYMD, daysCount, reason) {
+        const idx = pendingRequests.findIndex(r => r.id === id);
+        if (idx !== -1) {
+            approvedVacations.push({
+                id: "app_" + Date.now(),
+                start: startYMD,
+                end: endYMD,
+                daysCount: daysCount,
+                reason: reason
+            });
+            pendingRequests.splice(idx, 1);
+            updateUI();
+            showMessage("Solicitud aprobada y añadida al historial.", false);
+        } else {
+            showMessage("No se encontró la solicitud.", true);
+        }
+    }
+
+    // Rechazar solicitud
+    function rejectRequest(id) {
+        const idx = pendingRequests.findIndex(r => r.id === id);
+        if (idx !== -1) {
+            pendingRequests.splice(idx, 1);
+            updateUI();
+            showMessage("Solicitud rechazada y eliminada.", false);
+        } else {
+            showMessage("No se encontró la solicitud.", true);
+        }
+    }
+
+    // Mostrar mensajes temporales
+    function showMessage(msg, isError = true) {
+        const fb = document.getElementById('formFeedback');
+        fb.innerHTML = isError ? `❌ ${msg}` : `✅ ${msg}`;
+        setTimeout(() => {
+            if (fb.innerHTML.includes(msg)) fb.innerHTML = "";
+        }, 4000);
+    }
+
+    // ---------- EVENTOS DEL FORMULARIO ----------
+    const form = document.getElementById('vacationForm');
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    const calculatedDaysInput = document.getElementById('calculatedDays');
+    const reasonTextarea = document.getElementById('reason');
+
+    function updateCalculatedDays() {
+        const start = startInput.value;
+        const end = endInput.value;
+        if (start && end) {
+            const days = countBusinessDays(start, end);
+            calculatedDaysInput.value = days;
+        } else {
+            calculatedDaysInput.value = "0";
+        }
+    }
+
+    startInput.addEventListener('change', updateCalculatedDays);
+    endInput.addEventListener('change', updateCalculatedDays);
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const start = startInput.value;
+        const end = endInput.value;
+        const reason = reasonTextarea.value;
+
+        if (!start || !end) {
+            showMessage("Debes seleccionar ambas fechas.", true);
+            return;
+        }
+        const startDateObj = new Date(start);
+        const endDateObj = new Date(end);
+        if (startDateObj > endDateObj) {
+            showMessage("La fecha de inicio no puede ser posterior a la de término.", true);
+            return;
+        }
+        const businessDays = countBusinessDays(start, end);
+        if (businessDays === 0) {
+            showMessage("El rango seleccionado no contiene días hábiles (solo fines de semana).", true);
+            return;
+        }
+        try {
+            addVacationRequest(start, end, reason, businessDays);
+            startInput.value = "";
+            endInput.value = "";
+            reasonTextarea.value = "";
+            calculatedDaysInput.value = "0";
+            showMessage(`Solicitud enviada correctamente. Días solicitados: ${businessDays}. Quedó pendiente de aprobación.`, false);
+        } catch (err) {
+            showMessage(err.message, true);
+        }
+    });
+
+    // Establecer fecha mínima (hoy) para evitar fechas pasadas
+    const today = new Date().toISOString().split('T')[0];
+    startInput.setAttribute('min', today);
+    endInput.setAttribute('min', today);
+
+    // Inicializar cargando datos desde localStorage
+    loadFromLocalStorage();
+</script>
+
+</body>
+</html>
