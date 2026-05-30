@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitud de Vacaciones</title>
+    <!-- Sin CSS, diseño por defecto del navegador -->
+</head>
+<body>
+
+<h1>Solicitud de Vacaciones - Portal del Empleado</h1>
+
+<!-- 2. Contenido estático: datos del empleado -->
+<p><strong>Empleado:</strong> Elena Gutiérrez | <strong>ID:</strong> RRHH-1042 | <strong>Departamento:</strong> Operaciones</p>
+<hr>
+
+<!-- 3. Bloque de resumen de vacaciones (tabla simple) -->
+<h2>Resumen de Vacaciones</h2>
+<table border="1">
+    <thead>
+        <tr><th>Concepto</th><th>Días</th></tr>
+    </thead>
+    <tbody>
+        <tr><td>Días totales anuales</td><td id="totalDays">20</td></tr>
+        <tr><td>Días ya aprobados / tomados</td><td id="approvedDays">0</td></tr>
+        <tr><td>Días en solicitudes pendientes</td><td id="pendingDays">0</td></tr>
+        <tr><td><strong>Días disponibles para nueva solicitud</strong></td><td id="availableDays"><strong>0</strong></td></tr>
+    </tbody>
+</table>
+<br>
+
+<!-- 4. Formulario de nueva solicitud -->
+<h2>Nueva Solicitud de Vacaciones</h2>
+<form id="vacationForm">
+    <label>Fecha de inicio:</label>
+    <input type="date" id="startDate" required><br><br>
+
+    <label>Fecha de término:</label>
+    <input type="date" id="endDate" required><br><br>
+
+    <label>Días hábiles calculados:</label>
+    <input type="text" id="calculatedDays" readonly value="0"><br><br>
+
+    <label>Motivo (opcional):</label><br>
+    <textarea id="reason" rows="2" cols="40"></textarea><br><br>
+
+    <button type="submit">Enviar solicitud</button>
+</form>
+
+<div id="formFeedback"></div>
+
+<!-- Aquí normalmente irían las tablas de solicitudes (puntos 5-6), pero el usuario pidió solo del 1 al 4. 
+     Se incluye un mínimo para que la lógica funcione internamente, pero no se muestran listados completos
+     a menos que se requiera. Para que el resumen tenga sentido, se necesita gestionar solicitudes pendientes
+     y aprobadas, así que se añade JS con datos de ejemplo y funciones, pero sin mostrar tablas extra. -->
+
+<script>
+    // ---------- DATOS INICIALES ----------
+    const TOTAL_DAYS = 20;  // días hábiles anuales
+
+    // Vacaciones ya aprobadas (historial)
+    let approvedVacations = [
+        { id: "app1", start: "2025-01-10", end: "2025-01-14", daysCount: 3, reason: "Vacaciones verano" },
+        { id: "app2", start: "2025-02-17", end: "2025-02-19", daysCount: 2, reason: "Trámites personales" }
+    ];
+
+    // Solicitudes pendientes (inicialmente vacías, pero se pueden agregar)
+    let pendingRequests = [];
+
+    // ---------- FUNCIONES AUXILIARES ----------
+    // Calcular días hábiles (lunes a viernes) entre dos fechas (inclusive)
+    function countBusinessDays(startDateStr, endDateStr) {
+        const start = new Date(startDateStr);
+        const end = new Date(endDateStr);
+        if (isNaN(start) || isNaN(end) || start > end) return 0;
+        let current = new Date(start);
+        let businessDays = 0;
+        while (current <= end) {
+            const day = current.getDay();
+            if (day !== 0 && day !== 6) { // 0=domingo, 6=sábado
+                businessDays++;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        return businessDays;
+    }
+
+    // Total días aprobados
+    function getTotalApprovedDays() {
+        return approvedVacations.reduce((sum, v) => sum + v.daysCount, 0);
+    }
+
+    // Total días pendientes
+    function getTotalPendingDays() {
+        return pendingRequests.reduce((sum, v) => sum + v.daysCount, 0);
+    }
+
+    // Días disponibles para nueva solicitud
+    function getAvailableDays() {
+        return TOTAL_DAYS - (getTotalApprovedDays() + getTotalPendingDays());
+    }
+
+    // Verificar solapamiento de fechas con solicitudes existentes (aprobadas o pendientes)
+    function hasDateOverlap(startDate, endDate, excludeRequestId = null) {
+        const allRequests = [...approvedVacations, ...pendingRequests];
+        const newStart = new Date(startDate);
+        const newEnd = new Date(endDate);
+        for (let req of allRequests) {
+            if (excludeRequestId && req.id === excludeRequestId) continue;
+            const reqStart = new Date(req.start);
+            const reqEnd = new Date(req.end);
+            if (newStart <= reqEnd && newEnd >= reqStart) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Actualizar la interfaz (resumen)
+    function updateUI() {
+        document.getElementById('approvedDays').innerText = getTotalApprovedDays();
+        document.getElementById('pendingDays').innerText = getTotalPendingDays();
+        const available = getAvailableDays();
+        document.getElementById('availableDays').innerHTML = available >= 0 ? available : 0;
+        if (available < 0) {
+            document.getElementById('formFeedback').innerHTML = "<strong>⚠️ Atención:</strong> Has excedido tus días totales. Cancela alguna solicitud pendiente.";
+        } else {
+            document.getElementById('formFeedback').innerHTML = "";
+        }
+        // Guardar cambios en localStorage
+        saveToLocalStorage();
+    }
+
+    // Persistencia en localStorage
+    function saveToLocalStorage() {
+        const data = {
+            approvedVacations: approvedVacations,
+            pendingRequests: pendingRequests
+        };
+        localStorage.setItem("vacaciones_empleado", JSON.stringify(data));
+    }
+
+    function loadFromLocalStorage() {
+        const data = localStorage.getItem("vacaciones_empleado");
+        if (data) {
+            try {
+                const parsed = JSON.parse(data);
+                if (parsed.approvedVacations) approvedVacations = parsed.approvedVacations;
+                if (parsed.pendingRequests) pendingRequests = parsed.pendingRequests;
+            } catch(e) { console.warn(e); }
+        }
+        updateUI();
+    }
+
+    // Agregar solicitud pendiente
+    function addVacationRequest(startDate, endDate, reason, daysCount) {
+        // Validar disponibilidad
+        const available = getAvailableDays();
+        if (daysCount <= 0) throw new Error("Debe seleccionar un rango con al menos 1 día hábil.");
+        if (daysCount > available) {
+            throw new Error(`No puedes solicitar ${daysCount} días. Solo te quedan ${available} días disponibles.`);
+        }
+        // Validar solapamiento
+        if (hasDateOverlap(startDate, endDate)) {
+            throw new Error("Las fechas seleccionadas se solapan con otra solicitud ya registrada.");
+        }
+        // Validar fechas futuras (no pueden ser pasadas)
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const start = new Date(startDate);
+        if (start < today) throw new Error("No puedes solicitar vacaciones con fechas pasadas.");
+
+        const newId = "pend_" + Date.now() + "_" + Math.floor(Math.random()*1000);
+        const newRequest = {
+            id: newId,
+            start: startDate,
+            end: endDate,
+            daysCount: daysCount,
+            reason: reason.trim() || "Sin motivo especificado",
+            status: "Pendiente"
+        };
+        pendingRequests.push(newRequest);
+        updateUI();
+        return true;
+    }
+
+    // Mostrar mensajes en el div de feedback
+    function showMessage(msg, isError = true) {
+        const fb = document.getElementById('formFeedback');
+        fb.innerHTML = isError ? `<span style="color:#c00;">❌ ${msg}</span>` : `<span style="color:#060;">✅ ${msg}</span>`;
+        setTimeout(() => {
+            if (fb.innerHTML.includes(msg)) fb.innerHTML = "";
+        }, 5000);
+    }
+
+    // ---------- EVENTOS DEL FORMULARIO ----------
+    const form = document.getElementById('vacationForm');
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    const calculatedDaysInput = document.getElementById('calculatedDays');
+    const reasonTextarea = document.getElementById('reason');
+
+    // Actualizar días hábiles al cambiar fechas
+    function updateCalculatedDays() {
+        const start = startInput.value;
+        const end = endInput.value;
+        if (start && end) {
+            const days = countBusinessDays(start, end);
+            calculatedDaysInput.value = days;
+        } else {
+            calculatedDaysInput.value = "0";
+        }
+    }
+
+    startInput.addEventListener('change', updateCalculatedDays);
+    endInput.addEventListener('change', updateCalculatedDays);
+
+    // Envío del formulario
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const start = startInput.value;
+        const end = endInput.value;
+        const reason = reasonTextarea.value;
+
+        if (!start || !end) {
+            showMessage("Debes seleccionar ambas fechas.", true);
+            return;
+        }
+        const startDateObj = new Date(start);
+        const endDateObj = new Date(end);
+        if (startDateObj > endDateObj) {
+            showMessage("La fecha de inicio no puede ser posterior a la fecha de término.", true);
+            return;
+        }
+        const businessDays = countBusinessDays(start, end);
+        if (businessDays === 0) {
+            showMessage("El rango seleccionado no contiene días hábiles (solo fines de semana).", true);
+            return;
+        }
+        try {
+            addVacationRequest(start, end, reason, businessDays);
+            // Limpiar formulario (opcional)
+            startInput.value = "";
+            endInput.value = "";
+            reasonTextarea.value = "";
+            calculatedDaysInput.value = "0";
+            showMessage(`Solicitud enviada correctamente. Días solicitados: ${businessDays}. Quedó pendiente de aprobación.`, false);
+        } catch (err) {
+            showMessage(err.message, true);
+        }
+    });
+
+    // Establecer fecha mínima (hoy) en los campos date
+    const today = new Date().toISOString().split('T')[0];
+    startInput.setAttribute('min', today);
+    endInput.setAttribute('min', today);
+
+    // Cargar datos al iniciar
+    loadFromLocalStorage();
+</script>
+
+</body>
+</html>
